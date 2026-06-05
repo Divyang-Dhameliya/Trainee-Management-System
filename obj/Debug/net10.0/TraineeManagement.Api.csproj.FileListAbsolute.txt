@@ -47,3 +47,4 @@ C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\NSwag
 C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\NSwag.Generation.dll
 C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\NSwag.Generation.AspNetCore.dll
 C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\YamlDotNet.dll
+C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\obj\Debug\net10.0\TraineeManagement.Api.sourcelink.json

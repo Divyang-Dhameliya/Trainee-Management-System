@@ -1,42 +1,33 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using TraineeManagement.Api.Models;
+using TraineeManagement.Api.DTO.TraineeDTO;
 
+using TraineeManagement.Api.Service.TraineeeInterface;
 namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
 [Route("/api/trainees")]
 public class TraineeController : ControllerBase
 {
-    private static readonly List<Trainee> trainees = new List<Trainee> (
-    [
-        new Trainee(
-            1,
-            "Divyang",
-            "Dhameliya",
-            "dd@zeuslearning.com",
-            "HTML,CSS,JS",
-            "Active"
-        ),
-        new Trainee(
-            2,
-            "Khanjan",
-            "Fadadu",
-            "kf@zeuslearning.com",
-            "HTML,CSS,.NET",
-            "InActive"
-        )
-    ]);
+    private readonly ITraineeService _traineeService;
+
+    public TraineeController(ITraineeService traineeService)
+    {
+        _traineeService = traineeService;
+    }
 
     [HttpGet]
-    public List<Trainee> Get()
+    public List<TraineeResponse> Get()
     {
+        var trainees = _traineeService.GetTrainees();
         return trainees;
     }
 
     [HttpGet("{id}")]
     public IActionResult Get([FromRoute] long id)
     {
-        Trainee trainee = trainees.FirstOrDefault(t => t.Id == id);
+        TraineeResponse trainee = _traineeService.GetTraineeById(id);
 
         if(trainee == null){ return NotFound("Trainee not found with given ID"); }
 
@@ -44,12 +35,29 @@ public class TraineeController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Post([FromBody] Trainee trainee)
+    public IActionResult Post([FromBody] CreateTraineeRequest trainee)
     {
-        trainee.CreatedDate = DateTime.UtcNow;
-        trainee.UpdatedDate = DateTime.UtcNow;
-        trainee.Id = trainees.Count + 1;
-        trainees.Add(trainee);
+        TraineeResponse newtrainee = _traineeService.CreateTrainee(trainee);
+
+        return Ok(newtrainee);
+    }
+
+    [HttpDelete("{id}")]
+    public IActionResult Delete(long id)
+    {
+        bool isDeleted = _traineeService.DeleteTrainee(id);
+
+        if(!isDeleted) return NotFound("Trainee not found with given ID");
+
+        return NoContent();
+    }  
+
+    [HttpPut]
+    public IActionResult Put(UpdateTraineeRequest updateTraineeRequest)
+    {
+        TraineeResponse trainee = _traineeService.UpdateTrainee(updateTraineeRequest);
+
+        if(trainee == null){ return NotFound("Trainee not found with given ID"); }
 
         return Ok(trainee);
     }

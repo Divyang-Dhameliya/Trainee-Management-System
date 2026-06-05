@@ -1,11 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using TraineeManagement.Api.Enum.Trainee;
-namespace TraineeManagement.Api.Models;
 
-public class Trainee
+namespace TraineeManagement.Api.DTO.TraineeDTO;
+
+public class CreateTraineeRequest
 {
-    public long Id { get; set; }
-
     [Required(ErrorMessage = "First name is required")]
     [StringLength(50, ErrorMessage = "Firstname can't have more than 50 characters")]
     public string FirstName { get; set; }
@@ -21,18 +20,12 @@ public class Trainee
     [Required(ErrorMessage = "Tech-stack is required")]
     public string TechStack { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "Status is required")]
     [EnumDataType(typeof(TraineeStatus),ErrorMessage = "Trainee status can be either Active or Inactive")]
     public TraineeStatus Status { get; set; }
 
-    public DateTime CreatedDate { get; set; }
-    public DateTime UpdatedDate { get; set; }
-
-    public Trainee(long id, string firstName, string lastName, string email, string techstack, TraineeStatus status)
-    {
-        Id = id;
-        CreatedDate = DateTime.UtcNow;
-        UpdatedDate = DateTime.UtcNow;      
+    public CreateTraineeRequest(string firstName, string lastName, string email, string techstack, TraineeStatus status)
+    {     
         FirstName = firstName;
         LastName = lastName;
         Email = email;

@@ -21,9 +21,7 @@ public class TraineeController : ControllerBase
     public async Task<IActionResult> Get(string search)
     {
         var trainees = await _traineeService.SearchTrainee(search);
-
-        if(trainees == null || trainees.Count() == 0){ return NotFound("Trainee not found with given search query"); }
-
+        
         return Ok(trainees);
     }
 

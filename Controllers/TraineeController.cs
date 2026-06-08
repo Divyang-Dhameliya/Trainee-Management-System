@@ -18,11 +18,14 @@ public class TraineeController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get(string search)
+    public async Task<IActionResult> Get(string? search = null)
     {
-        var trainees = await _traineeService.SearchTrainee(search);
-        
-        return Ok(trainees);
+
+        if(search == null){
+            return Ok(await _traineeService.GetTrainees());
+        }
+
+        return Ok(await _traineeService.SearchTrainee(search));
     }
 
     [HttpGet("{id}")]

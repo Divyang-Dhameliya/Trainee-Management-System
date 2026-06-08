@@ -28,6 +28,7 @@ public class Trainee
     public DateTime CreatedDate { get; set; }
     public DateTime UpdatedDate { get; set; }
 
+    public Trainee() {}
     public Trainee(long id, string firstName, string lastName, string email, string techstack, TraineeStatus status)
     {
         Id = id;

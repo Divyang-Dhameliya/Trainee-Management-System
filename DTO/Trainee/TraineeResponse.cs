@@ -35,4 +35,9 @@ public class TraineeResponse
         CreatedDate = createdAt;
         UpdatedDate = updatedAt;
     }
+
+    public static implicit operator Task<object>(TraineeResponse v)
+    {
+        throw new NotImplementedException();
+    }
 }

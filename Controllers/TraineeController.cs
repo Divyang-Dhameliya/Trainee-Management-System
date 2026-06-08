@@ -18,16 +18,19 @@ public class TraineeController : ControllerBase
     }
 
     [HttpGet]
-    public List<TraineeResponse> Get()
+    public async Task<IActionResult> Get(string search)
     {
-        var trainees = _traineeService.GetTrainees();
-        return trainees;
+        var trainees = await _traineeService.SearchTrainee(search);
+
+        if(trainees == null || trainees.Count() == 0){ return NotFound("Trainee not found with given search query"); }
+
+        return Ok(trainees);
     }
 
     [HttpGet("{id}")]
-    public IActionResult Get([FromRoute] long id)
+    public async Task<IActionResult> Get([FromRoute] long id)
     {
-        TraineeResponse trainee = _traineeService.GetTraineeById(id);
+        var trainee = await _traineeService.GetTraineeById(id);
 
         if(trainee == null){ return NotFound("Trainee not found with given ID"); }
 
@@ -35,17 +38,17 @@ public class TraineeController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Post([FromBody] CreateTraineeRequest trainee)
+    public async Task<IActionResult> Post([FromBody] CreateTraineeRequest trainee)
     {
-        TraineeResponse newtrainee = _traineeService.CreateTrainee(trainee);
+        TraineeResponse newtrainee = await _traineeService.CreateTrainee(trainee);
 
         return Ok(newtrainee);
     }
 
     [HttpDelete("{id}")]
-    public IActionResult Delete(long id)
+    public async Task<IActionResult> Delete(long id)
     {
-        bool isDeleted = _traineeService.DeleteTrainee(id);
+        bool isDeleted = await _traineeService.DeleteTrainee(id);
 
         if(!isDeleted) return NotFound("Trainee not found with given ID");
 
@@ -53,9 +56,9 @@ public class TraineeController : ControllerBase
     }  
 
     [HttpPut]
-    public IActionResult Put(UpdateTraineeRequest updateTraineeRequest)
+    public async Task<IActionResult> Put(UpdateTraineeRequest updateTraineeRequest)
     {
-        TraineeResponse trainee = _traineeService.UpdateTrainee(updateTraineeRequest);
+        TraineeResponse trainee =await _traineeService.UpdateTrainee(updateTraineeRequest);
 
         if(trainee == null){ return NotFound("Trainee not found with given ID"); }
 

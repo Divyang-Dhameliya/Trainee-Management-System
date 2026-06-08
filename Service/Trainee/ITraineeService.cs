@@ -5,11 +5,12 @@ namespace TraineeManagement.Api.Service.TraineeeInterface;
 
 public interface ITraineeService
 {
-    List<TraineeResponse> GetTrainees();
-    TraineeResponse GetTraineeById(long id);
-    TraineeResponse CreateTrainee(CreateTraineeRequest trainee); 
+    Task<List<TraineeResponse>> GetTrainees();
+    Task<List<TraineeResponse>> SearchTrainee(string search);
+    Task<TraineeResponse> GetTraineeById(long id);
+    Task<TraineeResponse> CreateTrainee(CreateTraineeRequest trainee); 
 
-    TraineeResponse UpdateTrainee(UpdateTraineeRequest updatedTrainee);
+    Task<TraineeResponse> UpdateTrainee(UpdateTraineeRequest updatedTrainee);
 
-    bool DeleteTrainee(long id);
+    Task<bool> DeleteTrainee(long id);
 }

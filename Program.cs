@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using TraineeManagement.Api.Data;
 using TraineeManagement.Api.Service.TraineeeInterface;
 using TraineeManagement.Api.Service.TraineeService;
 
@@ -19,6 +21,9 @@ builder.Services.AddControllers()
 
 builder.Services.AddScoped<ITraineeService, TraineeService>(); 
 
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseInMemoryDatabase("TraineeManagement"));
+    
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

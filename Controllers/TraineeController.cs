@@ -21,7 +21,8 @@ public class TraineeController : ControllerBase
     public async Task<IActionResult> Get(string? search = null)
     {
 
-        if(search == null){
+        if (search == null)
+        {
             return Ok(await _traineeService.GetTrainees());
         }
 
@@ -31,17 +32,17 @@ public class TraineeController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> Get([FromRoute] long id)
     {
-        var trainee = await _traineeService.GetTraineeById(id);
+        TraineeResponseModel? trainee = await _traineeService.GetTraineeById(id);
 
-        if(trainee == null){ return NotFound("Trainee not found with given ID"); }
+        if (trainee == null) { return NotFound("Trainee not found with given ID"); }
 
         return Ok(trainee);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] CreateTraineeRequest trainee)
+    public async Task<IActionResult> Post([FromBody] CreateTraineeRequestModel trainee)
     {
-        TraineeResponse newtrainee = await _traineeService.CreateTrainee(trainee);
+        TraineeResponseModel newtrainee = await _traineeService.CreateTrainee(trainee);
 
         return Ok(newtrainee);
     }
@@ -51,17 +52,17 @@ public class TraineeController : ControllerBase
     {
         bool isDeleted = await _traineeService.DeleteTrainee(id);
 
-        if(!isDeleted) return NotFound("Trainee not found with given ID");
+        if (!isDeleted) return NotFound("Trainee not found with given ID");
 
         return NoContent();
-    }  
+    }
 
     [HttpPut]
-    public async Task<IActionResult> Put(UpdateTraineeRequest updateTraineeRequest)
+    public async Task<IActionResult> Put(UpdateTraineeRequestModel updateTraineeRequest)
     {
-        TraineeResponse trainee =await _traineeService.UpdateTrainee(updateTraineeRequest);
+        TraineeResponseModel? trainee = await _traineeService.UpdateTrainee(updateTraineeRequest);
 
-        if(trainee == null){ return NotFound("Trainee not found with given ID"); }
+        if (trainee == null) { return NotFound("Trainee not found with given ID"); }
 
         return Ok(trainee);
     }

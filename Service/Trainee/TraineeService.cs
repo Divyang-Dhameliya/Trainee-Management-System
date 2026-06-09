@@ -4,74 +4,120 @@ using TraineeManagement.Api.DTO.TraineeDTO;
 using Microsoft.EntityFrameworkCore.Storage.Json;
 using TraineeManagement.Api.Data;
 using Microsoft.EntityFrameworkCore;
-
+using TraineeManagement.Api.Constants;
 namespace TraineeManagement.Api.Service.TraineeService;
 
 public class TraineeService : ITraineeService
 {
-    private static readonly List<Trainee> trainees = new List<Trainee>([]);
     private readonly AppDbContext _context;
 
-    public TraineeService(AppDbContext context){ _context = context; }
+    public TraineeService(AppDbContext context) { _context = context; }
 
-    public async Task<List<TraineeResponse>> GetTrainees()
+    public async Task<List<TraineeResponseModel>> GetTrainees()
     {
-        List<TraineeResponse> traineeResponses = new List<TraineeResponse> ([]);
+        List<TraineeResponseModel> TraineeResponseModels = new([]);
 
-        List<Trainee> trainees = await _context.Trainees.ToListAsync();
+        List<TraineeModel> trainees = await _context.Trainees.ToListAsync();
 
-        foreach(Trainee t in trainees)
+        foreach (TraineeModel t in trainees)
         {
-            traineeResponses.Add(new TraineeResponse(t.Id,t.FirstName,t.LastName,t.Email,t.TechStack,t.Status,t.CreatedDate,t.UpdatedDate));
+            TraineeResponseModels.Add(
+                new TraineeResponseModel(
+                    t.Id,
+                    t.FirstName,
+                    t.LastName,
+                    t.Email,
+                    t.TechStack,
+                    t.Status,
+                    t.CreatedDate,
+                    t.UpdatedDate
+                )
+            );
         }
 
-        return traineeResponses;
+        return TraineeResponseModels;
     }
 
-    public async Task<List<TraineeResponse>> SearchTrainee(string search)
+    public async Task<List<TraineeResponseModel>> SearchTrainee(string search)
     {
-        var trainees = await _context.Trainees.Where(
+        List<TraineeResponseModel> trainees = await _context.Trainees.Where(
             trainee =>
-                trainee.FirstName.Contains(search) ||
-                trainee.LastName.Contains(search) ||
-                trainee.Email.Contains(search) ||
-                trainee.TechStack.Contains(search)
+                trainee.FirstName != null && trainee.FirstName.Contains(search) ||
+                trainee.LastName !=null && trainee.LastName.Contains(search) ||
+                trainee.Email != null && trainee.Email.Contains(search) ||
+                trainee.TechStack != null && trainee.TechStack.Contains(search)
         ).Select(
-            trainee => new TraineeResponse(trainee.Id,trainee.FirstName,trainee.LastName,trainee.Email,trainee.TechStack,trainee.Status,trainee.CreatedDate,trainee.UpdatedDate)
+            trainee => new TraineeResponseModel(
+                trainee.Id,
+                trainee.FirstName,
+                trainee.LastName,
+                trainee.Email,
+                trainee.TechStack,
+                trainee.Status,
+                trainee.CreatedDate,
+                trainee.UpdatedDate
+            )
         ).ToListAsync();
 
         return trainees;
     }
 
-    public async Task<TraineeResponse> GetTraineeById(long id)
+    public async Task<TraineeResponseModel?> GetTraineeById(long id)
     {
-        Trainee trainee = await _context.Trainees.FindAsync(id);
+        TraineeModel? trainee = await _context.Trainees.FindAsync(id);
 
-        if(trainee != null){ 
-            return new TraineeResponse(trainee.Id,trainee.FirstName,trainee.LastName,trainee.Email,trainee.TechStack,trainee.Status,trainee.CreatedDate,trainee.UpdatedDate);
+        if (trainee != null)
+        {
+            return new TraineeResponseModel(
+                trainee.Id,
+                trainee.FirstName,
+                trainee.LastName,
+                trainee.Email,
+                trainee.TechStack,
+                trainee.Status,
+                trainee.CreatedDate,
+                trainee.UpdatedDate
+            );
         }
 
         return null;
     }
 
-    public async Task<TraineeResponse> CreateTrainee(CreateTraineeRequest trainee)
+    public async Task<TraineeResponseModel> CreateTrainee(CreateTraineeRequestModel trainee)
     {
+        TraineeModel newTrainee = new TraineeModel(
+            _context.Trainees.ToList().Count + TraineeConstants.COUNT_INCREMENTOR_ONE,
+            trainee.FirstName,
+            trainee.LastName,
+            trainee.Email,
+            trainee.TechStack,
+            trainee.Status
+        );
 
-        Trainee newTrainee = new Trainee(_context.Trainees.ToList().Count + 1 ,trainee.FirstName, trainee.LastName, trainee.Email, trainee.TechStack, trainee.Status);
-        newTrainee.Id = _context.Trainees.ToList().Count + 1;
+        newTrainee.Id = _context.Trainees.ToList().Count + TraineeConstants.COUNT_INCREMENTOR_ONE;
         _context.Trainees.Add(newTrainee);
         await _context.SaveChangesAsync();
 
-        TraineeResponse traineeResponse = new TraineeResponse(newTrainee.Id,newTrainee.FirstName,newTrainee.LastName,newTrainee.Email,newTrainee.TechStack,newTrainee.Status,newTrainee.CreatedDate,newTrainee.UpdatedDate);
-        
-        return traineeResponse;
+        TraineeResponseModel TraineeResponseModel = new TraineeResponseModel(
+            newTrainee.Id,
+            newTrainee.FirstName,
+            newTrainee.LastName,
+            newTrainee.Email,
+            newTrainee.TechStack,
+            newTrainee.Status,
+            newTrainee.CreatedDate,
+            newTrainee.UpdatedDate
+        );
+
+        return TraineeResponseModel;
     }
 
-    public async Task<TraineeResponse> UpdateTrainee(UpdateTraineeRequest updatedtrainee)
+    public async Task<TraineeResponseModel?> UpdateTrainee(UpdateTraineeRequestModel updatedtrainee)
     {
-        Trainee trainee = await _context.Trainees.FindAsync(updatedtrainee.Id);
+        TraineeModel? trainee = await _context.Trainees.FindAsync(updatedtrainee.Id);
 
-        if(trainee == null){ 
+        if (trainee == null)
+        {
             return null;
         }
 
@@ -84,14 +130,24 @@ public class TraineeService : ITraineeService
 
         await _context.SaveChangesAsync();
 
-        return new TraineeResponse(trainee.Id, trainee.FirstName, trainee.LastName, trainee.Email,trainee.TechStack, trainee.Status, trainee.CreatedDate, trainee.UpdatedDate);
+        return new TraineeResponseModel(
+            trainee.Id,
+            trainee.FirstName,
+            trainee.LastName,
+            trainee.Email,
+            trainee.TechStack,
+            trainee.Status,
+            trainee.CreatedDate,
+            trainee.UpdatedDate
+        );
     }
 
     public async Task<bool> DeleteTrainee(long id)
     {
-        Trainee trainee = await _context.Trainees.FindAsync(id);
+        TraineeModel? trainee = await _context.Trainees.FindAsync(id);
 
-        if(trainee == null){ 
+        if (trainee == null)
+        {
             return false;
         }
 

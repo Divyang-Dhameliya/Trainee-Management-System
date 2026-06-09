@@ -2,9 +2,6 @@ namespace TraineeManagement.Api.Constants;
 
 public static class TraineeConstants
 {
-    public const string ApplicationStatus = "running";
-    public const string ApplicationName = "Trainee Management API";
-    public const int COUNT_INCREMENTOR_ONE = 1;
     public const int MaxLength = 50;
     public const string FirstNameRequiredErrorMessage = "First name is required";
     public const string FirstNameMaxLengthErrorMessage = "Firstname can't have more than 50 characters";

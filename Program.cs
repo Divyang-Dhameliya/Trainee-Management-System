@@ -21,8 +21,12 @@ builder.Services.AddControllers()
 
 builder.Services.AddScoped<ITraineeService, TraineeService>(); 
 
+// Get connection string from appsettings.json
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Register DBContext service
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseInMemoryDatabase("TraineeManagement"));
+    options.UseMySQL(connectionString));
     
 var app = builder.Build();
 

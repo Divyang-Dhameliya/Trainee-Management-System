@@ -86,7 +86,6 @@ public class TraineeService : ITraineeService
     public async Task<TraineeResponseModel> CreateTrainee(CreateTraineeRequestModel trainee)
     {
         TraineeModel newTrainee = new TraineeModel(
-            _context.Trainees.ToList().Count + TraineeConstants.COUNT_INCREMENTOR_ONE,
             trainee.FirstName,
             trainee.LastName,
             trainee.Email,
@@ -94,7 +93,6 @@ public class TraineeService : ITraineeService
             trainee.Status
         );
 
-        newTrainee.Id = _context.Trainees.ToList().Count + TraineeConstants.COUNT_INCREMENTOR_ONE;
         _context.Trainees.Add(newTrainee);
         await _context.SaveChangesAsync();
 

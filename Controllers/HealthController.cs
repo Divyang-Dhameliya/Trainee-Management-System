@@ -11,8 +11,8 @@ public class HealthController : ControllerBase
     {
         return Ok(new 
         {
-            status = TraineeConstants.ApplicationStatus,
-            application = TraineeConstants.ApplicationName,
+            status = ApplicationConstants.ApplicationStatus,
+            application = ApplicationConstants.ApplicationName,
             timestamp = DateTime.UtcNow
         });
     }

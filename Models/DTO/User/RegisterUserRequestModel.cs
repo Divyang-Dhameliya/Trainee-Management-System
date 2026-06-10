@@ -3,14 +3,11 @@ using TraineeManagement.Api.Enum.User;
 using TraineeManagement.Api.Constants;
 using Microsoft.EntityFrameworkCore;
 
-namespace TraineeManagement.Api.Models;
+namespace TraineeManagement.Api.DTO.UserDTO;
 
 [Index(nameof(UserName), IsUnique = true)]
-public class UserModel
+public class RegisterUserRequestModel
 {
-    [Key]
-    public long Id { get; set; }
-
     [Required(ErrorMessage = UserConstants.UserNameRequiredErrorMessage)]
     [StringLength(UserConstants.MaxLength, ErrorMessage = UserConstants.UserNameMaxLengthErrorMessage)]
     public string? UserName { get; set; }
@@ -20,23 +17,17 @@ public class UserModel
     public string? Email { get; set; }
 
     [Required(ErrorMessage = UserConstants.PasswordHashRequiredErrorMessage)]
-    public string? PasswordHash { get; set; }
+    public string? Password { get; set; }
 
     [Required(ErrorMessage = UserConstants.RoleRequiredErrorMessage)]
     [EnumDataType(typeof(UserRole), ErrorMessage = UserConstants.RoleValidateErrorMessage)]
     public UserRole? Role { get; set; }
 
-    public DateTime CreatedDate { get; set; }
-    public DateTime UpdatedDate { get; set; }
-
-    public UserModel() { }
-    public UserModel(string? userName, string? email, string? passwordHash, UserRole? role)
+    public RegisterUserRequestModel(string? userName, string? email, string? password, UserRole? role)
     {
-        CreatedDate = DateTime.UtcNow;
-        UpdatedDate = DateTime.UtcNow;
         UserName = userName;
         Email = email;
-        PasswordHash = passwordHash;
+        Password = password;
         Role = role;
     }
 }

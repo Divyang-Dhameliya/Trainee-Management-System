@@ -4,10 +4,12 @@ using TraineeManagement.Api.Models;
 using TraineeManagement.Api.DTO.TraineeDTO;
 
 using TraineeManagement.Api.Service.TraineeeInterface;
+using Microsoft.AspNetCore.Authorization;
 namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
 [Route("/api/trainees")]
+[Authorize]
 public class TraineeController : ControllerBase
 {
     private readonly ITraineeService _traineeService;

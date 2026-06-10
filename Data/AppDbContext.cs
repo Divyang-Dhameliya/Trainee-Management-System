@@ -10,4 +10,6 @@ public class AppDbContext : DbContext
         : base(options) { }
 
     public DbSet<TraineeModel> Trainees { get; set; }
+
+    public DbSet<UserModel> Users { get; set; }
 }

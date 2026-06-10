@@ -150,3 +150,11 @@ C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\runti
 C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\runtimes\win-x64\native\krb5_64.dll
 C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\runtimes\win-x64\native\krbcc64.dll
 C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\runtimes\win\lib\net8.0\System.Windows.Extensions.dll
+C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\System.IdentityModel.Tokens.Jwt.dll

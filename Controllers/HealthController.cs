@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TraineeManagement.Api.Constants;
 namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
 [Route("api/health")]
+[Authorize]
 public class HealthController : ControllerBase
 {
     [HttpGet]

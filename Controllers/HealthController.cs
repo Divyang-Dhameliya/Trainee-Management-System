@@ -5,7 +5,6 @@ namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
 [Route("api/health")]
-[Authorize]
 public class HealthController : ControllerBase
 {
     [HttpGet]

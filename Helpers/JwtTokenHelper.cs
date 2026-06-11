@@ -30,6 +30,4 @@ public static class JwtTokenHelper
         var tokenHandler = new JsonWebTokenHandler();
         return tokenHandler.CreateToken(tokenDescriptor);
     }
-
-    
 }

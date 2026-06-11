@@ -1,5 +1,6 @@
 using TraineeManagement.Api.Models;
 using TraineeManagement.Api.DTO.TraineeDTO;
+using TraineeManagement.Api.Enum.Trainee;
 
 namespace TraineeManagement.Api.Service.TraineeeInterface;
 
@@ -7,7 +8,7 @@ public interface ITraineeService
 {
     Task<List<TraineeResponseModel>> GetTrainees();
 
-    Task<List<TraineeResponseModel>> SearchTrainee(string search);
+    Task<PaginationTraineeResponse> SearchTrainee(string search, TraineeStatus status, int pageNumber, int pageSize);
 
     Task<TraineeResponseModel?> GetTraineeById(long id);
 

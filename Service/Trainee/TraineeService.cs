@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Storage.Json;
 using TraineeManagement.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using TraineeManagement.Api.Constants;
+using TraineeManagement.Api.Enum.Trainee;
 namespace TraineeManagement.Api.Service.TraineeService;
 
 public class TraineeService : ITraineeService
@@ -38,14 +39,15 @@ public class TraineeService : ITraineeService
         return TraineeResponseModels;
     }
 
-    public async Task<List<TraineeResponseModel>> SearchTrainee(string search)
+    public async Task<PaginationTraineeResponse> SearchTrainee(string search, TraineeStatus status, int pageNumber, int pageSize)
     {
         List<TraineeResponseModel> trainees = await _context.Trainees.Where(
             trainee =>
-                trainee.FirstName != null && trainee.FirstName.Contains(search) ||
+                (trainee.FirstName != null && trainee.FirstName.Contains(search) ||
                 trainee.LastName !=null && trainee.LastName.Contains(search) ||
                 trainee.Email != null && trainee.Email.Contains(search) ||
-                trainee.TechStack != null && trainee.TechStack.Contains(search)
+                trainee.TechStack != null && trainee.TechStack.Contains(search)) &&
+                trainee.Status == status
         ).Select(
             trainee => new TraineeResponseModel(
                 trainee.Id,
@@ -59,7 +61,10 @@ public class TraineeService : ITraineeService
             )
         ).ToListAsync();
 
-        return trainees;
+
+        IEnumerable<TraineeResponseModel> traineeRes = trainees.Skip(pageSize*(pageNumber-1)).Take(pageSize);
+
+        return new PaginationTraineeResponse(pageNumber, pageSize, trainees.Count, traineeRes);
     }
 
     public async Task<TraineeResponseModel?> GetTraineeById(long id)

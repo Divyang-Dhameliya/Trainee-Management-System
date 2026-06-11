@@ -10,23 +10,31 @@ public class AuthService : IAuthService
     private readonly AppDbContext _context;
     private readonly IPasswordService _passwordService;
     private readonly IConfiguration _config;
+    private readonly ILogger<AuthService> _logger;
 
-    public AuthService(AppDbContext context, IPasswordService passwordService, IConfiguration config) 
+    public AuthService(AppDbContext context, IPasswordService passwordService, IConfiguration config, ILogger<AuthService> logger) 
     { 
         _context = context; 
         _passwordService = passwordService;
         _config = config;
+        _logger = logger;
     }
 
     public async Task<RegisterUserResponseModel> RegisterUser(RegisterUserRequestModel userRequestModel)
     {   
+        
+        if(userRequestModel.Password == null || userRequestModel.UserName == null)
+        {
+            throw new Exception("Username and Password is Required");
+        }
+
         UserModel? user = _context.Users.FirstOrDefault(
             user => user.UserName == userRequestModel.UserName
         );
 
         if(user != null)
         {
-            throw new Exception("User Already Exists");
+            throw new Exception("User Already Exists, Proceed with Login.");
         }
 
         UserModel newUser = new UserModel(
@@ -57,11 +65,17 @@ public class AuthService : IAuthService
             user => user.UserName == userRequestModel.UserName
         );
 
-        if(user == null || userRequestModel.Password == null || user.UserName == null || user.Role == null) return null;
+        if(user == null || userRequestModel.Password == null || user.UserName == null)
+        {
+            throw new Exception("Invalid Credentials");
+        }
 
         bool isValidPassword = await _passwordService.VerifyPassword(user, userRequestModel.Password);
 
-        if(!isValidPassword) return null;
+        if(!isValidPassword)
+        {
+            throw new Exception("Invalid Credentials");
+        }
 
         string token = JwtTokenHelper.GenerateToken(_config, user.Id, user.UserName, user.Role.ToString());
 
@@ -73,6 +87,11 @@ public class AuthService : IAuthService
 
         var jwtSettings = _config.GetSection("JwtSettings");
 
+        if(jwtSettings == null || jwtSettings["ExpiryMinutes"] == null)
+        {
+            _logger.LogCritical("JWT configuration Not Found");
+        }
+
         LoginUserResponseModel res = new LoginUserResponseModel(
             token,
             int.Parse(jwtSettings["ExpiryMinutes"]),
@@ -81,6 +100,4 @@ public class AuthService : IAuthService
 
         return res;
     }
-
-
 }

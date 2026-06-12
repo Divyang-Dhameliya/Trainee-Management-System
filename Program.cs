@@ -11,6 +11,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Google.Protobuf.WellKnownTypes;
+using TraineeManagement.Api.Service.LearningTaskInterface;
+using TraineeManagement.Api.Service.MentorInterface;
+using TraineeManagement.Api.Service.MentorService;
+using TraineeManagement.Api.Service.LearningTaskService;
+using TraineeManagement.Api.Service.PasswordService;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,11 +59,10 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddScoped<ITraineeService, TraineeService>(); 
-
 builder.Services.AddScoped<IAuthService, AuthService>(); 
-
+builder.Services.AddScoped<IMentorService, MentorService>(); 
+builder.Services.AddScoped<ILearningTaskService, LearningTaskService>(); 
 builder.Services.AddScoped<IPasswordService, PasswordService>();
-
 builder.Services.AddScoped<IPasswordHasher<UserModel>, PasswordHasher<UserModel>>();
     
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

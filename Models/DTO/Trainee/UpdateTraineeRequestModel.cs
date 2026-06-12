@@ -6,8 +6,6 @@ namespace TraineeManagement.Api.DTO.TraineeDTO;
 
 public class UpdateTraineeRequestModel
 {
-    public long Id { get; set; }
-
     [Required(ErrorMessage = TraineeConstants.FirstNameRequiredErrorMessage)]
     [StringLength(TraineeConstants.MaxLength, ErrorMessage = TraineeConstants.FirstNameMaxLengthErrorMessage)]
     public string? FirstName { get; set; }
@@ -26,9 +24,8 @@ public class UpdateTraineeRequestModel
     [Required(ErrorMessage = TraineeConstants.StatusRequiredErrorMessage)]
     [EnumDataType(typeof(TraineeStatus), ErrorMessage = TraineeConstants.StatusValidateErrorMessage)]
     public TraineeStatus? Status { get; set; }
-    public UpdateTraineeRequestModel(long id, string? firstName, string? lastName, string? email, string? techstack, TraineeStatus? status)
+    public UpdateTraineeRequestModel(string? firstName, string? lastName, string? email, string? techstack, TraineeStatus? status)
     {
-        Id = id;
         FirstName = firstName;
         LastName = lastName;
         Email = email;

@@ -1,18 +1,20 @@
 using TraineeManagement.Api.Models;
 using TraineeManagement.Api.Service.TraineeeInterface;
 using TraineeManagement.Api.DTO.TraineeDTO;
-using Microsoft.EntityFrameworkCore.Storage.Json;
 using TraineeManagement.Api.Data;
 using Microsoft.EntityFrameworkCore;
-using TraineeManagement.Api.Constants;
 using TraineeManagement.Api.Enum.Trainee;
+
 namespace TraineeManagement.Api.Service.TraineeService;
 
 public class TraineeService : ITraineeService
 {
     private readonly AppDbContext _context;
 
-    public TraineeService(AppDbContext context) { _context = context; }
+    public TraineeService(AppDbContext context)
+    { 
+        _context = context; 
+    }
 
     public async Task<List<TraineeResponseModel>> GetTrainees()
     {
@@ -20,18 +22,18 @@ public class TraineeService : ITraineeService
 
         List<TraineeModel> trainees = await _context.Trainees.ToListAsync();
 
-        foreach (TraineeModel t in trainees)
+        foreach (TraineeModel trainee in trainees)
         {
             TraineeResponseModels.Add(
                 new TraineeResponseModel(
-                    t.Id,
-                    t.FirstName,
-                    t.LastName,
-                    t.Email,
-                    t.TechStack,
-                    t.Status,
-                    t.CreatedDate,
-                    t.UpdatedDate
+                    trainee.Id,
+                    trainee.FirstName,
+                    trainee.LastName,
+                    trainee.Email,
+                    trainee.TechStack,
+                    trainee.Status,
+                    trainee.CreatedDate,
+                    trainee.UpdatedDate
                 )
             );
         }
@@ -115,9 +117,9 @@ public class TraineeService : ITraineeService
         return TraineeResponseModel;
     }
 
-    public async Task<TraineeResponseModel?> UpdateTrainee(UpdateTraineeRequestModel updatedtrainee)
+public async Task<TraineeResponseModel?> UpdateTrainee(long id, UpdateTraineeRequestModel updatedtrainee)
     {
-        TraineeModel? trainee = await _context.Trainees.FindAsync(updatedtrainee.Id);
+        TraineeModel? trainee = await _context.Trainees.FindAsync(id);
 
         if (trainee == null)
         {

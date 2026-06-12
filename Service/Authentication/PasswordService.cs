@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using TraineeManagement.Api.Constants;
 using TraineeManagement.Api.Service.PasswordServiceInterface;
 using Microsoft.AspNetCore.Identity;
-namespace TraineeManagement.Api.Service.TraineeService;
+namespace TraineeManagement.Api.Service.PasswordService;
 
 public class PasswordService : IPasswordService
 {

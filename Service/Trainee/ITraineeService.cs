@@ -1,4 +1,3 @@
-using TraineeManagement.Api.Models;
 using TraineeManagement.Api.DTO.TraineeDTO;
 using TraineeManagement.Api.Enum.Trainee;
 
@@ -14,7 +13,7 @@ public interface ITraineeService
 
     Task<TraineeResponseModel> CreateTrainee(CreateTraineeRequestModel trainee);
 
-    Task<TraineeResponseModel?> UpdateTrainee(UpdateTraineeRequestModel updatedTrainee);
+    Task<TraineeResponseModel?> UpdateTrainee(long id, UpdateTraineeRequestModel updatedTrainee);
 
     Task<bool> DeleteTrainee(long id);
 }

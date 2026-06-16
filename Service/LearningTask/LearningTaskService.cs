@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TraineeManagement.Api.Enum.Trainee;
 using TraineeManagement.Api.Service.LearningTaskInterface;
 using TraineeManagement.Api.DTO.LearningTaskDTO;
+using System.Net;
 
 namespace TraineeManagement.Api.Service.LearningTaskService;
 
@@ -47,21 +48,21 @@ public class LearningTaskService : ILearningTaskService
     {
         LearningTaskModel? learningTask = await _context.LearningTasks.FindAsync(id);
 
-        if (learningTask != null)
+        if(learningTask == null)
         {
-            return new LearningTaskResponseModel(
-                learningTask.Id,
-                learningTask.Title,
-                learningTask.Description,
-                learningTask.ExpectedTechStack,
-                learningTask.DueDate,
-                learningTask.Status,
-                learningTask.CreatedDate,
-                learningTask.UpdatedDate
-            );
+            throw new HttpStatusException(HttpStatusCode.NotFound, "LearningTask not found with given ID.");
         }
 
-        return null;
+        return new LearningTaskResponseModel(
+            learningTask.Id,
+            learningTask.Title,
+            learningTask.Description,
+            learningTask.ExpectedTechStack,
+            learningTask.DueDate,
+            learningTask.Status,
+            learningTask.CreatedDate,
+            learningTask.UpdatedDate
+        );
     }
 
     public async Task<LearningTaskResponseModel> CreateLearningTask(CreateLearningTaskRequestModel learningTask)
@@ -97,7 +98,7 @@ public class LearningTaskService : ILearningTaskService
 
         if (learningTask == null)
         {
-            return null;
+            throw new HttpStatusException(HttpStatusCode.NotFound, "LearningTask not found with given ID.");
         }
 
         learningTask.Title = updatedLearningTask.Title;
@@ -127,7 +128,7 @@ public class LearningTaskService : ILearningTaskService
 
         if (learningTask == null)
         {
-            return false;
+            throw new HttpStatusException(HttpStatusCode.NotFound, "LearningTask not found with given ID.");
         }
 
         _context.LearningTasks.Remove(learningTask);

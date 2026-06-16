@@ -3,6 +3,7 @@ using TraineeManagement.Api.Data;
 using TraineeManagement.Api.Service.AuthInterface;
 using TraineeManagement.Api.Service.PasswordServiceInterface;
 using TraineeManagement.Api.DTO.UserDTO;
+using System.Net;
 namespace TraineeManagement.Api.Service.AuthService;
 
 public class AuthService : IAuthService
@@ -25,7 +26,7 @@ public class AuthService : IAuthService
         
         if(userRequestModel.Password == null || userRequestModel.UserName == null)
         {
-            throw new Exception("Username and Password is Required");
+            throw new HttpStatusException(HttpStatusCode.BadRequest,"Username and Password is Required");
         }
 
         UserModel? user = _context.Users.FirstOrDefault(
@@ -34,7 +35,7 @@ public class AuthService : IAuthService
 
         if(user != null)
         {
-            throw new Exception("User Already Exists, Proceed with Login.");
+            throw new HttpStatusException(HttpStatusCode.BadRequest,"User Already Exists, Proceed with Login.");
         }
 
         UserModel newUser = new UserModel(
@@ -67,14 +68,14 @@ public class AuthService : IAuthService
 
         if(user == null || userRequestModel.Password == null || user.UserName == null)
         {
-            throw new Exception("Invalid Credentials");
+            throw new HttpStatusException(HttpStatusCode.BadRequest,"Invalid Credentials");
         }
 
         bool isValidPassword = await _passwordService.VerifyPassword(user, userRequestModel.Password);
 
         if(!isValidPassword)
         {
-            throw new Exception("Invalid Credentials");
+            throw new HttpStatusException(HttpStatusCode.Unauthorized,"Invalid Credentials");
         }
 
         string token = JwtTokenHelper.GenerateToken(_config, user.Id, user.UserName, user.Role.ToString());

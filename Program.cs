@@ -16,6 +16,9 @@ using TraineeManagement.Api.Service.MentorInterface;
 using TraineeManagement.Api.Service.MentorService;
 using TraineeManagement.Api.Service.LearningTaskService;
 using TraineeManagement.Api.Service.PasswordService;
+using TraineeManagement.Api.Service.TaskAssignmentInterface;
+using TraineeManagement.Api.Service.SubmissionInterface;
+using TraineeManagement.Api.Service.ReviewInterface;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -63,8 +66,14 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMentorService, MentorService>(); 
 builder.Services.AddScoped<ILearningTaskService, LearningTaskService>(); 
 builder.Services.AddScoped<IPasswordService, PasswordService>();
+builder.Services.AddScoped<ITaskAssignmentService, TaskAssignmentService>();
+builder.Services.AddScoped<ISubmissionService, SubmissionService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IPasswordHasher<UserModel>, PasswordHasher<UserModel>>();
-    
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Register DBContext service
@@ -83,6 +92,7 @@ builder.Services.AddCors(options =>
     
 var app = builder.Build();
 
+app.UseExceptionHandler(); 
 app.UseAuthentication(); 
 app.UseAuthorization();
 

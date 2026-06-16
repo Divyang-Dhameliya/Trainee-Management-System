@@ -20,16 +20,9 @@ public class AuthController : ControllerBase
     {
         _logger.LogInformation("HTTP Post received for Register User. Username: {Username}", userRequestModel.UserName); 
 
-        try{
-            RegisterUserResponseModel res = await _authService.RegisterUser(userRequestModel);
-            _logger.LogInformation("Registration completed successfully. Username: {Username}", res.UserName);
-            return Ok(res);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to Register User for Username: {Username}", userRequestModel.UserName);
-            return BadRequest(ex.Message);
-        }
+        RegisterUserResponseModel res = await _authService.RegisterUser(userRequestModel);
+        _logger.LogInformation("Registration completed successfully. Username: {Username}", res.UserName);
+        return Ok(res);
     }
 
     [HttpPost("login")]
@@ -37,15 +30,8 @@ public class AuthController : ControllerBase
     {
         _logger.LogInformation("HTTP Post received for Login User. Username: {Username}", userRequestModel.UserName); 
 
-        try{
-            LoginUserResponseModel? res = await _authService.LoginUser(userRequestModel);
-            _logger.LogInformation("Login completed successfully. Username: {Username}", userRequestModel.UserName);
-            return Ok(res);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to Login User for Username: {Username}", userRequestModel.UserName);
-            return Unauthorized(ex.Message);
-        }
+        LoginUserResponseModel? res = await _authService.LoginUser(userRequestModel);
+        _logger.LogInformation("Login completed successfully. Username: {Username}", userRequestModel.UserName);
+        return Ok(res);
     }
 }

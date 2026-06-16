@@ -16,4 +16,10 @@ public class AppDbContext : DbContext
     public DbSet<MentorModel> Mentors { get; set; }
 
     public DbSet<LearningTaskModel> LearningTasks { get; set;}
+
+    public DbSet<TaskAssignmentModel> TaskAssignments { get; set; }
+
+    public DbSet<SubmissionModel> Submissions { get; set; }
+
+    public DbSet<ReviewModel> Reviews { get; set; }
 }

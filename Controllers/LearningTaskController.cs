@@ -36,12 +36,6 @@ public class LearningTaskController : ControllerBase
         _logger.LogInformation("HTTP GET received for getLearningTaskByID. LearningTaskId: {LearningTaskid}", id); 
         LearningTaskResponseModel? LearningTask = await _learningTaskService.GetLearningTaskById(id);
 
-        if (LearningTask == null) 
-        { 
-            _logger.LogWarning("getLearningTaskByID, LearningTask not found with given ID: {LearningTaskID}", id);
-            return NotFound("LearningTask not found with given ID"); 
-        }
-
         _logger.LogInformation("GetLearningTaskByID completed successfully.");
         return Ok(LearningTask);
     }
@@ -61,13 +55,7 @@ public class LearningTaskController : ControllerBase
     {
         _logger.LogInformation("HTTP DELETE received for LearningTaskID : {LearningTaskid}", id);
 
-        bool isDeleted = await _learningTaskService.DeleteLearningTask(id);
-
-        if (!isDeleted) 
-        {
-            _logger.LogWarning("DeleteByID, LearningTask not found with given ID: {LearningTaskID}", id); 
-            return NotFound("LearningTask not found with given ID");
-        }
+        await _learningTaskService.DeleteLearningTask(id);
 
         _logger.LogInformation("DeleteByID completed successfully");
         return NoContent();
@@ -79,12 +67,6 @@ public class LearningTaskController : ControllerBase
         _logger.LogInformation("HTTP PUT received for UpdateLearningTask.");
 
         LearningTaskResponseModel? LearningTask = await _learningTaskService.UpdateLearningTask(id, updateLearningTaskRequest);
-
-        if (LearningTask == null) 
-        { 
-            _logger.LogWarning("DeleteByID, LearningTask not found with given ID: {LearningTaskID}", id); 
-            return NotFound("LearningTask not found with given ID"); 
-        }
 
         _logger.LogInformation("HTTP PUT UpdateLearningTask completed successfully.");
 

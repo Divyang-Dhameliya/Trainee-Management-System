@@ -4,6 +4,7 @@ using TraineeManagement.Api.DTO.TraineeDTO;
 using TraineeManagement.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using TraineeManagement.Api.Enum.Trainee;
+using System.Net;
 
 namespace TraineeManagement.Api.Service.TraineeService;
 
@@ -72,22 +73,22 @@ public class TraineeService : ITraineeService
     public async Task<TraineeResponseModel?> GetTraineeById(long id)
     {
         TraineeModel? trainee = await _context.Trainees.FindAsync(id);
-
-        if (trainee != null)
+        
+        if(trainee == null)
         {
-            return new TraineeResponseModel(
-                trainee.Id,
-                trainee.FirstName,
-                trainee.LastName,
-                trainee.Email,
-                trainee.TechStack,
-                trainee.Status,
-                trainee.CreatedDate,
-                trainee.UpdatedDate
-            );
+            throw new HttpStatusException(HttpStatusCode.NotFound, "Trainee not found with given ID.");
         }
 
-        return null;
+        return new TraineeResponseModel(
+            trainee.Id,
+            trainee.FirstName,
+            trainee.LastName,
+            trainee.Email,
+            trainee.TechStack,
+            trainee.Status,
+            trainee.CreatedDate,
+            trainee.UpdatedDate
+        );
     }
 
     public async Task<TraineeResponseModel> CreateTrainee(CreateTraineeRequestModel trainee)
@@ -117,13 +118,13 @@ public class TraineeService : ITraineeService
         return TraineeResponseModel;
     }
 
-public async Task<TraineeResponseModel?> UpdateTrainee(long id, UpdateTraineeRequestModel updatedtrainee)
+    public async Task<TraineeResponseModel?> UpdateTrainee(long id, UpdateTraineeRequestModel updatedtrainee)
     {
         TraineeModel? trainee = await _context.Trainees.FindAsync(id);
 
         if (trainee == null)
         {
-            return null;
+            throw new HttpStatusException(HttpStatusCode.NotFound, "Trainee not found with given ID.");
         }
 
         trainee.FirstName = updatedtrainee.FirstName;
@@ -153,7 +154,7 @@ public async Task<TraineeResponseModel?> UpdateTrainee(long id, UpdateTraineeReq
 
         if (trainee == null)
         {
-            return false;
+            throw new HttpStatusException(HttpStatusCode.NotFound, "Trainee not found with given ID.");
         }
 
         _context.Trainees.Remove(trainee);

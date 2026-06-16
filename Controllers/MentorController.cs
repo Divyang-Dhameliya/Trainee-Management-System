@@ -38,12 +38,6 @@ public class MentorController : ControllerBase
         _logger.LogInformation("HTTP GET received for getMentorByID. MentorId: {Mentorid}", id); 
         MentorResponseModel? Mentor = await _mentorService.GetMentorById(id);
 
-        if (Mentor == null) 
-        { 
-            _logger.LogWarning("getMentorByID, Mentor not found with given ID: {MentorID}", id);
-            return NotFound("Mentor not found with given ID"); 
-        }
-
         _logger.LogInformation("GetMentorByID completed successfully.");
         return Ok(Mentor);
     }
@@ -63,13 +57,7 @@ public class MentorController : ControllerBase
     {
         _logger.LogInformation("HTTP DELETE received for MentorID : {Mentorid}", id);
 
-        bool isDeleted = await _mentorService.DeleteMentor(id);
-
-        if (!isDeleted) 
-        {
-            _logger.LogWarning("DeleteByID, Mentor not found with given ID: {MentorID}", id); 
-            return NotFound("Mentor not found with given ID");
-        }
+        await _mentorService.DeleteMentor(id);
 
         _logger.LogInformation("DeleteByID completed successfully");
         return NoContent();
@@ -81,12 +69,6 @@ public class MentorController : ControllerBase
         _logger.LogInformation("HTTP PUT received for UpdateMentor.");
 
         MentorResponseModel? Mentor = await _mentorService.UpdateMentor(id, updateMentorRequest);
-
-        if (Mentor == null) 
-        { 
-            _logger.LogWarning("DeleteByID, Mentor not found with given ID: {MentorID}", id); 
-            return NotFound("Mentor not found with given ID"); 
-        }
 
         _logger.LogInformation("HTTP PUT UpdateMentor completed successfully.");
 

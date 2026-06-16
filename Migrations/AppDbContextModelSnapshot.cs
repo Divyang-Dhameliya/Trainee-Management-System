@@ -94,6 +94,111 @@ namespace TraineeManagement.Api.Migrations
                     b.ToTable("Mentors");
                 });
 
+            modelBuilder.Entity("TraineeManagement.Api.Models.ReviewModel", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Feedback")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<long>("MentorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("ReviewDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("ReviewStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<long>("SubmissionId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MentorId");
+
+                    b.HasIndex("SubmissionId");
+
+                    b.ToTable("Reviews");
+                });
+
+            modelBuilder.Entity("TraineeManagement.Api.Models.SubmissionModel", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SubmissionUrl")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("SubmittedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long>("TaskAssignmentId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskAssignmentId");
+
+                    b.ToTable("Submissions");
+                });
+
+            modelBuilder.Entity("TraineeManagement.Api.Models.TaskAssignmentModel", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("AssignedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long>("LearningTaskId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("MentorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Remarks")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<long>("TraineeId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LearningTaskId");
+
+                    b.HasIndex("MentorId");
+
+                    b.HasIndex("TraineeId");
+
+                    b.ToTable("TaskAssignments");
+                });
+
             modelBuilder.Entity("TraineeManagement.Api.Models.TraineeModel", b =>
                 {
                     b.Property<long>("Id")
@@ -166,6 +271,63 @@ namespace TraineeManagement.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("TraineeManagement.Api.Models.ReviewModel", b =>
+                {
+                    b.HasOne("TraineeManagement.Api.Models.MentorModel", "Mentor")
+                        .WithMany()
+                        .HasForeignKey("MentorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TraineeManagement.Api.Models.SubmissionModel", "Submission")
+                        .WithMany()
+                        .HasForeignKey("SubmissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Mentor");
+
+                    b.Navigation("Submission");
+                });
+
+            modelBuilder.Entity("TraineeManagement.Api.Models.SubmissionModel", b =>
+                {
+                    b.HasOne("TraineeManagement.Api.Models.TaskAssignmentModel", "TaskAssignment")
+                        .WithMany()
+                        .HasForeignKey("TaskAssignmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TaskAssignment");
+                });
+
+            modelBuilder.Entity("TraineeManagement.Api.Models.TaskAssignmentModel", b =>
+                {
+                    b.HasOne("TraineeManagement.Api.Models.LearningTaskModel", "LearningTask")
+                        .WithMany()
+                        .HasForeignKey("LearningTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TraineeManagement.Api.Models.MentorModel", "Mentor")
+                        .WithMany()
+                        .HasForeignKey("MentorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TraineeManagement.Api.Models.TraineeModel", "Trainee")
+                        .WithMany()
+                        .HasForeignKey("TraineeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LearningTask");
+
+                    b.Navigation("Mentor");
+
+                    b.Navigation("Trainee");
                 });
 #pragma warning restore 612, 618
         }

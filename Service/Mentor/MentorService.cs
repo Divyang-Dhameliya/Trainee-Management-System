@@ -3,6 +3,7 @@ using TraineeManagement.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using TraineeManagement.Api.Service.MentorInterface;
 using TraineeManagement.Api.DTO.MentorDTO;
+using System.Net;
 
 namespace TraineeManagement.Api.Service.MentorService;
 
@@ -44,21 +45,21 @@ public class MentorService : IMentorService
     {
         MentorModel? mentor = await _context.Mentors.FindAsync(id);
 
-        if (mentor != null)
+        if(mentor == null)
         {
-            return new MentorResponseModel(
-                mentor.Id,
-                mentor.FirstName,
-                mentor.LastName,
-                mentor.Email,
-                mentor.Expertise,
-                mentor.Status,
-                mentor.CreatedDate,
-                mentor.UpdatedDate
-            );
+            throw new HttpStatusException(HttpStatusCode.NotFound, "Mentor not found with given ID.");
         }
 
-        return null;
+        return new MentorResponseModel(
+            mentor.Id,
+            mentor.FirstName,
+            mentor.LastName,
+            mentor.Email,
+            mentor.Expertise,
+            mentor.Status,
+            mentor.CreatedDate,
+            mentor.UpdatedDate
+        );
     }
     public async Task<MentorResponseModel> CreateMentor(CreateMentorRequestModel mentor)
     {
@@ -93,7 +94,7 @@ public class MentorService : IMentorService
 
         if (mentor == null)
         {
-            return null;
+            throw new HttpStatusException(HttpStatusCode.NotFound, "Mentor not found with given ID.");
         }
 
         mentor.FirstName = updatedMentor.FirstName;
@@ -123,7 +124,7 @@ public class MentorService : IMentorService
 
         if (mentor == null)
         {
-            return false;
+            throw new HttpStatusException(HttpStatusCode.NotFound, "Trainee not found with given ID.");
         }
 
         _context.Mentors.Remove(mentor);

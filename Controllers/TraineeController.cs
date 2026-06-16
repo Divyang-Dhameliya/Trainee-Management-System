@@ -42,12 +42,6 @@ public class TraineeController : ControllerBase
         _logger.LogInformation("HTTP GET received for getTraineeByID. TraineeId: {Traineeid}", id); 
         TraineeResponseModel? trainee = await _traineeService.GetTraineeById(id);
 
-        if (trainee == null) 
-        { 
-            _logger.LogWarning("getTraineeByID, Trainee not found with given ID: {TraineeID}", id);
-            return NotFound("Trainee not found with given ID"); 
-        }
-
         _logger.LogInformation("GetTraineeByID completed successfully.");
         return Ok(trainee);
     }
@@ -67,13 +61,7 @@ public class TraineeController : ControllerBase
     {
         _logger.LogInformation("HTTP DELETE received for TraineeID : {Traineeid}", id);
 
-        bool isDeleted = await _traineeService.DeleteTrainee(id);
-
-        if (!isDeleted) 
-        {
-            _logger.LogWarning("DeleteByID, Trainee not found with given ID: {TraineeID}", id); 
-            return NotFound("Trainee not found with given ID");
-        }
+        await _traineeService.DeleteTrainee(id);
 
         _logger.LogInformation("DeleteByID completed successfully");
         return NoContent();
@@ -85,12 +73,6 @@ public class TraineeController : ControllerBase
         _logger.LogInformation("HTTP PUT received for UpdateTrainee.");
 
         TraineeResponseModel? trainee = await _traineeService.UpdateTrainee(id, updateTraineeRequest);
-
-        if (trainee == null) 
-        { 
-            _logger.LogWarning("DeleteByID, Trainee not found with given ID: {TraineeID}", id); 
-            return NotFound("Trainee not found with given ID"); 
-        }
 
         _logger.LogInformation("HTTP PUT UpdateTrainee completed successfully.");
 

@@ -158,3 +158,4 @@ C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\Micro
 C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\divyang.dhameliya\Desktop\TraineeManagement.Api\bin\Debug\net10.0\Dapper.dll

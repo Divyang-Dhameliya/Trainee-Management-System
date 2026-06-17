@@ -5,6 +5,8 @@ using TraineeManagement.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using TraineeManagement.Api.Enum.Trainee;
 using System.Net;
+using System.Data;
+using Dapper;
 
 namespace TraineeManagement.Api.Service.TraineeService;
 
@@ -44,30 +46,69 @@ public class TraineeService : ITraineeService
 
     public async Task<PaginationTraineeResponse> SearchTrainee(string search, TraineeStatus status, int pageNumber, int pageSize)
     {
-        List<TraineeResponseModel> trainees = await _context.Trainees.Where(
-            trainee =>
-                (trainee.FirstName != null && trainee.FirstName.Contains(search) ||
-                trainee.LastName !=null && trainee.LastName.Contains(search) ||
-                trainee.Email != null && trainee.Email.Contains(search) ||
-                trainee.TechStack != null && trainee.TechStack.Contains(search)) &&
-                trainee.Status == status
-        ).Select(
-            trainee => new TraineeResponseModel(
-                trainee.Id,
-                trainee.FirstName,
-                trainee.LastName,
-                trainee.Email,
-                trainee.TechStack,
-                trainee.Status,
-                trainee.CreatedDate,
-                trainee.UpdatedDate
-            )
-        ).ToListAsync();
+        // Approach - 1 (Using LINQ & Skip() & Take() Methods)
+        
+        // List<TraineeResponseModel> trainees = await _context.Trainees.Where(
+        //     trainee =>
+        //         (trainee.FirstName != null && trainee.FirstName.Contains(search) ||
+        //         trainee.LastName !=null && trainee.LastName.Contains(search) ||
+        //         trainee.Email != null && trainee.Email.Contains(search) ||
+        //         trainee.TechStack != null && trainee.TechStack.Contains(search)) &&
+        //         trainee.Status == status
+        // ).Select(
+        //     trainee => new TraineeResponseModel(
+        //         trainee.Id,
+        //         trainee.FirstName,
+        //         trainee.LastName,
+        //         trainee.Email,
+        //         trainee.TechStack,
+        //         trainee.Status,
+        //         trainee.CreatedDate,
+        //         trainee.UpdatedDate
+        //     )
+        // ).ToListAsync();
 
 
-        IEnumerable<TraineeResponseModel> traineeRes = trainees.Skip(pageSize*(pageNumber-1)).Take(pageSize);
+        // IEnumerable<TraineeResponseModel> traineeRes = trainees.Skip(pageSize*(pageNumber-1)).Take(pageSize);
 
-        return new PaginationTraineeResponse(pageNumber, pageSize, trainees.Count, traineeRes);
+        // return new PaginationTraineeResponse(pageNumber, pageSize, trainees.Count, traineeRes);
+
+        
+        // Approach - 2 (Using Stored Procedure)
+        var connection = _context.Database.GetDbConnection();
+
+        if (connection.State != ConnectionState.Open)
+        {
+            await connection.OpenAsync();
+        }
+
+        var parameters = new {
+            p_Status = status,
+            p_SearchValue = search,
+            p_PageNumber = pageNumber,
+            p_PageSize = pageSize
+        };
+
+        var dbResults = await connection.QueryAsync(
+            "GetTraineesPaginatedAndSearched",
+            parameters,
+            commandType: CommandType.StoredProcedure
+        );
+        
+        int totalEntries = Convert.ToInt32(dbResults.FirstOrDefault()?.TotalCount) ?? 0;
+
+        IEnumerable<TraineeResponseModel> trainees = dbResults.Select(r => new TraineeResponseModel (
+            (long)r.Id,
+            (string)r.FirstName,
+            (string)r.LastName,
+            (string)r.Email,
+            (string)r.TechStack,
+            r.Status != null ? (TraineeStatus?)(int)r.Status : null,
+            (DateTime)r.CreatedDate,
+            (DateTime)r.UpdatedDate
+        ));
+
+        return new PaginationTraineeResponse(pageNumber, pageSize, totalEntries, trainees);
     }
 
     public async Task<TraineeResponseModel?> GetTraineeById(long id)

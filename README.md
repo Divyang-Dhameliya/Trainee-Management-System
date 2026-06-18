@@ -1,25 +1,233 @@
 # Task Tracker Application
 
-## Technology Used
-C#, .NET Core
+## Tech Stack
 
-## How to Run
-- Import The project
-- Run `dotnet run` command in command line terminal
+- ASP.NET Core Web ApI
+- Entity Framework Core
+- MySQL
+- JWT Authentication
 
-## List of Apis
-- GET /api/health 
-- GET /api/trainees
-- GET /api/trainees?search=param
-- GET /api/trainees/{id}
-- POST /api/trainees
-- DELETE /api/trainees/{id}
-- PUT /api/trainees
+---
+
+# Features Completed
+
+- JWT Authentication
+- Password Hashing
+- CRUD APIs
+- Pagination and Search
+- Structured Logging
+- Global Exception Hnadling
+- CORS Configuration
+- MySQL Db with EF Core
+
+---
+
+# Project Setup
+ 
+## Prerequisites
+ 
+- .NET 10 SDK
+- MySQL Server
+- Visual Studio / VS Code
+ 
+---
+ 
+# Clone Repository
+ 
+```bash
+git clone <repository-url>
+cd TraineeManagement.Api
+```
+ 
+---
+ 
+# Database Configuration
+ 
+Update `appsettings.json`
+ 
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "server=localhost;port=3306;database=trainee_management_db;user=root;password=your_password;"
+  }
+}
+```
+ 
+---
+ 
+# EF Core Migration Commands
+ 
+Create Migration
+ 
+```bash
+dotnet ef migrations add InitialCreate
+```
+ 
+Update Database
+ 
+```bash
+dotnet ef database update
+```
+ 
+Remove Migration
+ 
+```bash
+dotnet ef migrations remove
+```
+ 
+---
+ 
+# Run Application
+ 
+```bash
+dotnet run
+```
+ 
+Swagger
+ 
+```
+https://localhost:xxxx/swagger
+```
+ 
+---
+
+# Authentication
+ 
+## Login API
+ 
+### POST
+ 
+```
+/api/auth/login
+```
+ 
+Request
+ 
+```json
+{
+  "username": "admin",
+  "password": "Admin@123"
+}
+```
+ 
+Response
+ 
+```json
+{
+  "token": "jwt-token",
+  "expiresIn": 3600,
+  "user": {
+    "id": 1,
+    "username": "admin",
+    "role": "Admin"
+  }
+}
+```
+ 
+---
+
+# JWT Usage
+ 
+Add token in request header
+ 
+```http
+Authorization: Bearer <JWT_TOKEN>
+```
+ 
+---
+
+# API List
+ 
+## Health
+ 
+```
+GET /api/health
+```
+ 
+---
+ 
+## Authentication
+ 
+```
+POST /api/auth/register
+POST /api/auth/login
+```
+ 
+---
+ 
+## Trainees
+ 
+```
+GET    /api/trainees
+GET    /api/trainees/{id}
+POST   /api/trainees
+PUT    /api/trainees/{id}
+DELETE /api/trainees/{id}
+```
+ 
+Supports
+ 
+```
+GET /api/trainees?pageNumber=1&pageSize=10&search=amit&status=Active
+```
+ 
+---
+ 
+## Mentors
+ 
+```
+GET    /api/mentors
+GET    /api/mentors/{id}
+POST   /api/mentors
+PUT    /api/mentors/{id}
+DELETE /api/mentors/{id}
+```
+ 
+---
+ 
+## Learning Tasks
+ 
+```
+GET    /api/learning-tasks
+GET    /api/learning-tasks/{id}
+POST   /api/learning-tasks
+PUT    /api/learning-tasks/{id}
+DELETE /api/learning-tasks/{id}
+```
+ 
+---
+ 
+## Task Assignments
+ 
+```
+POST /api/task-assignments
+GET  /api/task-assignments
+GET  /api/task-assignments/{id}
+PUT  /api/task-assignments/{id}/status
+```
+ 
+---
+ 
+## Submissions
+ 
+```
+POST /api/submissions
+GET  /api/submissions
+GET  /api/submissions/{id}
+```
+ 
+---
+ 
+## Reviews
+ 
+```
+POST /api/reviews
+GET  /api/reviews
+GET  /api/reviews/{id}
+```
+ 
+---
   
-## Features Completed
-- Health Api
-- Trainee's CRUD operations
-
 ## Sample Request & Response JSON
 
 GET /api/health
@@ -171,6 +379,47 @@ PUT /api/trainees
 }
 ```
 
+---
+
+# Security Checklist
+ 
+✅ Passwords stored as hash only
+ 
+✅ JWT Authentication enabled
+ 
+✅ Protected APIs require token
+ 
+✅ DTOs used to prevent excessive data exposure
+ 
+✅ EF Core prevents SQL injection
+ 
+✅ Secrets are not hardcoded
+ 
+✅ CORS restricted to allowed origins
+  
+✅ Passwords and JWT tokens are not logged
+ 
+---
+
+# Known Limitations
+ 
+- Refresh token support not implemented.
+- Role-based authorization can be enhanced.
+- No caching mechanism (Redis) is implemented.
+  
+---
+ 
+# Future Improvements
+ 
+- Refresh Tokens
+- Role-based Authorization
+- Docker Support
+- Unit Testing
+- Redis Caching
+- CI/CD Pipeline
+ 
+---
+
 ## Challenges Faced
  - Faced Security restriction related issues during initializing and running project
- - Faced challenges during api creation, To overcome that i have refer Docs & Web Search.
+ - Faced challenges during api creation, To overcome that I have refered Docs & Web Search.

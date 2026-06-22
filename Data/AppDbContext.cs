@@ -22,4 +22,6 @@ public class AppDbContext : DbContext
     public DbSet<SubmissionModel> Submissions { get; set; }
 
     public DbSet<ReviewModel> Reviews { get; set; }
+
+    public DbSet<SubmissionFile> SubmissionFiles { get; set; }
 }

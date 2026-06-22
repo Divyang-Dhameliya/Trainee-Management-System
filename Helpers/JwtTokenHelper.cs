@@ -3,6 +3,8 @@ using System.Text;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
+namespace TraineeManagement.Api.Helpers;
+
 public static class JwtTokenHelper
 {
     public static string GenerateToken(IConfiguration _config,long userID, string username, string? role)

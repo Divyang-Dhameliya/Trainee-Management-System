@@ -20,7 +20,7 @@ public class TraineeResponseModel
 
     public DateTime UpdatedDate { get; set; }
 
-    public TraineeResponseModel(long id, string? firstName, string? lastName, string? email, string? techstack, TraineeStatus? status, DateTime createdAt, DateTime updatedAt)
+    public TraineeResponseModel(long id, string? firstName, string? lastName, string? email, string? techstack, TraineeStatus? status, DateTime createdDate, DateTime updatedDate)
     {
         Id = id;
         FirstName = firstName;
@@ -28,8 +28,8 @@ public class TraineeResponseModel
         Email = email;
         TechStack = techstack;
         Status = status;
-        CreatedDate = createdAt;
-        UpdatedDate = updatedAt;
+        CreatedDate = createdDate;
+        UpdatedDate = updatedDate;
     }
 
     public static implicit operator Task<object>(TraineeResponseModel v)

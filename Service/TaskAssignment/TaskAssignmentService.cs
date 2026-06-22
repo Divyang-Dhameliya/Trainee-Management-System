@@ -10,11 +10,16 @@ using TraineeManagement.Api.Service.TaskAssignmentInterface;
 public class TaskAssignmentService : ITaskAssignmentService
 {
     private readonly AppDbContext _context;
+    private readonly ILogger<TaskAssignmentService> _logger;
+    private readonly ICacheService _cacheService; 
 
-    public TaskAssignmentService(AppDbContext context)
+    public TaskAssignmentService(AppDbContext context, ILogger<TaskAssignmentService> logger, ICacheService cacheService)
     {
         _context = context;
+        _logger = logger;
+        _cacheService = cacheService;
     }
+
     public async Task<TaskAssignmentResponseModel> CreateTaskAssignment(CreateTaskAssignmentRequestModel taskAssignment)
     {
         if(taskAssignment.AssignedDate > taskAssignment.DueDate)
@@ -51,6 +56,18 @@ public class TaskAssignmentService : ITaskAssignmentService
 
     public async Task<TaskAssignmentResponseModel?> GetTaskAssignmentById(long id)
     {
+        string cacheKey = CacheKeys.TaskAssignment(id);
+
+        TaskAssignmentResponseModel? cachedTaskAssignment = await _cacheService.GetAsync<TaskAssignmentResponseModel>(cacheKey);
+        
+        if(cachedTaskAssignment != null)
+        {
+            _logger.LogInformation("Cache hit for {CacheKey}", cacheKey);
+            return cachedTaskAssignment;
+        }
+
+        _logger.LogInformation("Cache miss for {CacheKey}", cacheKey);
+
         TaskAssignmentModel? taskAssignment = await _context.TaskAssignments.FindAsync(id);
 
         if(taskAssignment == null)
@@ -58,7 +75,7 @@ public class TaskAssignmentService : ITaskAssignmentService
             throw new HttpStatusException(HttpStatusCode.NotFound, "TaskAssignment not found with given ID.");
         }
 
-        return new TaskAssignmentResponseModel(
+        TaskAssignmentResponseModel response = new TaskAssignmentResponseModel(
             taskAssignment.Id,
             taskAssignment.TraineeId,
             taskAssignment.MentorId,
@@ -68,10 +85,26 @@ public class TaskAssignmentService : ITaskAssignmentService
             taskAssignment.Status,
             taskAssignment.Remarks
         );
+
+        await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromMinutes(10));
+        
+        return response;
     }
 
     public async Task<List<TaskAssignmentResponseModel>> GetTaskAssignments()
     {
+        string cacheKey = CacheKeys.TaskAssignmentsAll;
+
+        List<TaskAssignmentResponseModel>? cachedTaskAssignments = await _cacheService.GetAsync<List<TaskAssignmentResponseModel>>(cacheKey);
+        
+        if(cachedTaskAssignments != null)
+        {
+            _logger.LogInformation("Cache hit for {CacheKey}", cacheKey);
+            return cachedTaskAssignments;
+        }
+
+        _logger.LogInformation("Cache miss for {CacheKey}", cacheKey);
+
         List<TaskAssignmentResponseModel> TaskAssignmentResponseModels = new([]);
 
         List<TaskAssignmentModel> taskAssignments = await _context.TaskAssignments.ToListAsync();
@@ -92,6 +125,8 @@ public class TaskAssignmentService : ITaskAssignmentService
             );
         }
 
+        await _cacheService.SetAsync(cacheKey, TaskAssignmentResponseModels, TimeSpan.FromMinutes(10));
+
         return TaskAssignmentResponseModels;
     }
 
@@ -107,6 +142,9 @@ public class TaskAssignmentService : ITaskAssignmentService
         taskAssignment.Status = status;
 
         await _context.SaveChangesAsync();
+
+        await _cacheService.RemoveAsync(CacheKeys.TaskAssignment(id));
+        await _cacheService.RemoveAsync(CacheKeys.TaskAssignmentsAll);
 
         return new TaskAssignmentResponseModel(
             taskAssignment.Id,

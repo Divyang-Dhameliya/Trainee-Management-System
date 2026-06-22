@@ -4,6 +4,7 @@ using TraineeManagement.Api.Service.AuthInterface;
 using TraineeManagement.Api.Service.PasswordServiceInterface;
 using TraineeManagement.Api.DTO.UserDTO;
 using System.Net;
+using TraineeManagement.Api.Helpers;
 namespace TraineeManagement.Api.Service.AuthService;
 
 public class AuthService : IAuthService

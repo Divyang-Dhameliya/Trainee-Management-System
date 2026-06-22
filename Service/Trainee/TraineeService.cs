@@ -13,17 +13,34 @@ namespace TraineeManagement.Api.Service.TraineeService;
 public class TraineeService : ITraineeService
 {
     private readonly AppDbContext _context;
+    private readonly ICacheService _cacheService;
+    private readonly ILogger<TraineeService> _logger;
 
-    public TraineeService(AppDbContext context)
+    public TraineeService(AppDbContext context, ICacheService cacheService, ILogger<TraineeService> logger)
     { 
         _context = context; 
+        _cacheService = cacheService;
+        _logger = logger;
     }
 
     public async Task<List<TraineeResponseModel>> GetTrainees()
     {
+        string cacheKey = CacheKeys.TraineesAll;
+
+        List<TraineeResponseModel>? cachedTrainees = await _cacheService.GetAsync<List<TraineeResponseModel>>(cacheKey);
+        
+        if(cachedTrainees != null)
+        {
+            _logger.LogInformation("Cache hit for {CacheKey}", cacheKey);
+            return cachedTrainees;
+        }
+
+        _logger.LogInformation("Cache miss for {CacheKey}", cacheKey);
+
         List<TraineeResponseModel> TraineeResponseModels = new([]);
 
         List<TraineeModel> trainees = await _context.Trainees.ToListAsync();
+
 
         foreach (TraineeModel trainee in trainees)
         {
@@ -40,6 +57,8 @@ public class TraineeService : ITraineeService
                 )
             );
         }
+
+        await _cacheService.SetAsync(cacheKey, TraineeResponseModels, TimeSpan.FromMinutes(10));
 
         return TraineeResponseModels;
     }
@@ -97,15 +116,15 @@ public class TraineeService : ITraineeService
         
         int totalEntries = Convert.ToInt32(dbResults.FirstOrDefault()?.TotalCount) ?? 0;
 
-        IEnumerable<TraineeResponseModel> trainees = dbResults.Select(r => new TraineeResponseModel (
-            (long)r.Id,
-            (string)r.FirstName,
-            (string)r.LastName,
-            (string)r.Email,
-            (string)r.TechStack,
-            r.Status != null ? (TraineeStatus?)(int)r.Status : null,
-            (DateTime)r.CreatedDate,
-            (DateTime)r.UpdatedDate
+        IEnumerable<TraineeResponseModel> trainees = dbResults.Select(trainee => new TraineeResponseModel (
+            (long)trainee.Id,
+            (string)trainee.FirstName,
+            (string)trainee.LastName,
+            (string)trainee.Email,
+            (string)trainee.TechStack,
+            trainee.Status != null ? (TraineeStatus?)(int)trainee.Status : null,
+            (DateTime)trainee.CreatedDate,
+            (DateTime)trainee.UpdatedDate
         ));
 
         return new PaginationTraineeResponse(pageNumber, pageSize, totalEntries, trainees);
@@ -113,6 +132,18 @@ public class TraineeService : ITraineeService
 
     public async Task<TraineeResponseModel?> GetTraineeById(long id)
     {
+        string cacheKey = CacheKeys.Trainee(id);
+
+        TraineeResponseModel? cachedTrainee = await _cacheService.GetAsync<TraineeResponseModel>(cacheKey);
+        
+        if(cachedTrainee != null)
+        {
+            _logger.LogInformation("Cache hit for {CacheKey}", cacheKey);
+            return cachedTrainee;
+        }
+
+        _logger.LogInformation("Cache miss for {CacheKey}", cacheKey);
+
         TraineeModel? trainee = await _context.Trainees.FindAsync(id);
         
         if(trainee == null)
@@ -120,7 +151,8 @@ public class TraineeService : ITraineeService
             throw new HttpStatusException(HttpStatusCode.NotFound, "Trainee not found with given ID.");
         }
 
-        return new TraineeResponseModel(
+
+        TraineeResponseModel response =  new TraineeResponseModel(
             trainee.Id,
             trainee.FirstName,
             trainee.LastName,
@@ -130,6 +162,10 @@ public class TraineeService : ITraineeService
             trainee.CreatedDate,
             trainee.UpdatedDate
         );
+
+        await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromMinutes(10));
+
+        return response;
     }
 
     public async Task<TraineeResponseModel> CreateTrainee(CreateTraineeRequestModel trainee)
@@ -177,6 +213,9 @@ public class TraineeService : ITraineeService
 
         await _context.SaveChangesAsync();
 
+        await _cacheService.RemoveAsync(CacheKeys.Trainee(id));
+        await _cacheService.RemoveAsync(CacheKeys.TraineesAll);
+
         return new TraineeResponseModel(
             trainee.Id,
             trainee.FirstName,
@@ -201,6 +240,9 @@ public class TraineeService : ITraineeService
         _context.Trainees.Remove(trainee);
 
         await _context.SaveChangesAsync();
+        
+        await _cacheService.RemoveAsync(CacheKeys.Trainee(id));
+        await _cacheService.RemoveAsync(CacheKeys.TraineesAll);
 
         return true;
     }

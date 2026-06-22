@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using TraineeManagement.Api.DTO.SubmissionDTO;
 using TraineeManagement.Api.Service.SubmissionInterface;
+using TraineeManagement.Api.DTO.SubmissionFileDTO;
 
 namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
-[Route("/api/submissions")]
 [Authorize]
 public class SubmissionController : ControllerBase
 {
@@ -19,7 +19,7 @@ public class SubmissionController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet]
+    [HttpGet("/api/submissions")]
     public async Task<IActionResult> Get()
     {
         _logger.LogInformation("HTTP GET received for getSubmission.");
@@ -31,7 +31,7 @@ public class SubmissionController : ControllerBase
         return Ok(Submissions);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("/api/submissions/{id}")]
     public async Task<IActionResult> Get([FromRoute] long id)
     {
         _logger.LogInformation("HTTP GET received for getSubmissionByID. SubmissionId: {Submissionid}", id); 
@@ -41,7 +41,7 @@ public class SubmissionController : ControllerBase
         return Ok(Submission);
     }
 
-    [HttpPost]
+    [HttpPost("/api/submissions")]
     public async Task<IActionResult> Post([FromBody] CreateSubmissionRequestModel Submission)
     {
         _logger.LogInformation("HTTP POST received for CreateSubmission.");
@@ -49,5 +49,47 @@ public class SubmissionController : ControllerBase
         _logger.LogInformation("HTTP POST CreateSubmission completed successfully.");
 
         return Ok(newSubmission);
+    }
+
+    [HttpPost("/api/submissions/{submissionId}/files")]
+    public async Task<IActionResult> Upload(long submissionId, [FromForm] IFormFile File, CancellationToken cancellationToken)
+    {
+        SubmissionFileResponseModel result = await _submissionService.UploadAsync(
+            submissionId,
+            File,
+            cancellationToken
+        );
+
+        return CreatedAtAction(
+            nameof(Get),
+            new { id = result.Id },
+            result
+        );
+    }
+
+    [HttpGet("/api/submission-files/{fileId}/download")]
+    public async Task<IActionResult> Download(long fileId, CancellationToken cancellationToken)
+    {
+        DownloadSubmissionFileResponseModel result = await _submissionService.DownloadAsync(
+            fileId,
+            cancellationToken
+        );
+
+        return File(
+            result.Stream,
+            result.ContentType,
+            result.FileName
+        );
+    }
+
+    [HttpDelete("/api/submission-files/{fileId}")]
+    public async Task<IActionResult> Delete(long fileId, CancellationToken cancellationToken)
+    {
+        await _submissionService.DeleteAsync(
+            fileId,
+            cancellationToken
+        );
+
+        return NoContent();
     }
 }

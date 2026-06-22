@@ -129,6 +129,48 @@ namespace TraineeManagement.Api.Migrations
                     b.ToTable("Reviews");
                 });
 
+            modelBuilder.Entity("TraineeManagement.Api.Models.SubmissionFile", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Checksum")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<long>("SizeInBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StorageFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<long>("SubmissionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubmissionId");
+
+                    b.ToTable("SubmissionFiles");
+                });
+
             modelBuilder.Entity("TraineeManagement.Api.Models.SubmissionModel", b =>
                 {
                     b.Property<long>("Id")
@@ -292,6 +334,17 @@ namespace TraineeManagement.Api.Migrations
                     b.Navigation("Submission");
                 });
 
+            modelBuilder.Entity("TraineeManagement.Api.Models.SubmissionFile", b =>
+                {
+                    b.HasOne("TraineeManagement.Api.Models.SubmissionModel", "Submission")
+                        .WithMany("Files")
+                        .HasForeignKey("SubmissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Submission");
+                });
+
             modelBuilder.Entity("TraineeManagement.Api.Models.SubmissionModel", b =>
                 {
                     b.HasOne("TraineeManagement.Api.Models.TaskAssignmentModel", "TaskAssignment")
@@ -328,6 +381,11 @@ namespace TraineeManagement.Api.Migrations
                     b.Navigation("Mentor");
 
                     b.Navigation("Trainee");
+                });
+
+            modelBuilder.Entity("TraineeManagement.Api.Models.SubmissionModel", b =>
+                {
+                    b.Navigation("Files");
                 });
 #pragma warning restore 612, 618
         }

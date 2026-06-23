@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Net;
 using Google.Protobuf.WellKnownTypes;
 using Microsoft.EntityFrameworkCore;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.Options;
 using TraineeManagement.Api.Data;
 using TraineeManagement.Api.DTO.SubmissionDTO;
 using TraineeManagement.Api.DTO.SubmissionFileDTO;
+using TraineeManagement.Api.Enum.Submission;
 using TraineeManagement.Api.Helpers;
 using TraineeManagement.Api.Models;
 using TraineeManagement.Api.Service.SubmissionInterface;
@@ -14,16 +16,25 @@ public class SubmissionService : ISubmissionService
     private readonly AppDbContext _context;
     private readonly FileStorageOptions _options;
     private readonly IFileStorageService _fileStorageService;
-    private ILogger<SubmissionService> _logger;
-    private ICacheService _cacheService;
+    private readonly ILogger<SubmissionService> _logger;
+    private readonly ICacheService _cacheService;
+    private readonly IMessagePublisher _messagePublisher;
 
-    public SubmissionService(AppDbContext context, IOptions<FileStorageOptions> options, IFileStorageService fileStorageService, ILogger<SubmissionService> logger, ICacheService cacheService)
+    public SubmissionService(
+        AppDbContext context,
+        IOptions<FileStorageOptions> options, 
+        IFileStorageService fileStorageService, 
+        ILogger<SubmissionService> logger, 
+        ICacheService cacheService,
+        IMessagePublisher messagePublisher
+    )
     {
         _context = context;
         _options = options.Value;
         _fileStorageService = fileStorageService;
         _logger = logger;
         _cacheService = cacheService;
+        _messagePublisher = messagePublisher;
     }
 
     public async Task<SubmissionResponseModel> CreateSubmission(CreateSubmissionRequestModel submission)
@@ -192,8 +203,32 @@ public class SubmissionService : ISubmissionService
 
             _context.SubmissionFiles.Add(submissionFile);
 
+            if(submissionFile.Submission !=null)
+            {
+                submissionFile.Submission.Status = SubmissionStatusEnum.Queued;
+            }
+
             await _context.SaveChangesAsync(cancellationToken);
 
+            SubmissionProcessingRequested message = new SubmissionProcessingRequested
+            {
+                MessageId = Guid.NewGuid(),
+                CorrealtionId = Guid.NewGuid(),
+                SubmissionId = submissionId,
+                FileId = submissionFile.Id,
+                RequestedAt = DateTime.UtcNow
+            };
+
+            await _messagePublisher.PublishAsync(message);
+
+            _logger.LogInformation(
+                "Submission processing message published. MessageId: {MessageId}, CorrealtionId: {CorrealtionId}, SubmissionId: {SubmisssionId}, FileId: {FileId}",
+                message.MessageId,
+                message.CorrealtionId,
+                message.SubmissionId,
+                message.FileId
+            );
+            
             return new SubmissionFileResponseModel
             {
                 Id = submissionFile.Id,

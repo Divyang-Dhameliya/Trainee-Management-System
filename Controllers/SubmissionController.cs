@@ -60,11 +60,7 @@ public class SubmissionController : ControllerBase
             cancellationToken
         );
 
-        return CreatedAtAction(
-            nameof(Get),
-            new { id = result.Id },
-            result
-        );
+        return Accepted(result);
     }
 
     [HttpGet("/api/submission-files/{fileId}/download")]

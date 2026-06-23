@@ -6,5 +6,9 @@ namespace TraineeManagement.Api.Enum.Submission;
 public enum SubmissionStatusEnum
 {
     Submitted,
-    Resubmitted
+    Resubmitted,
+    Queued,
+    Processing,
+    Completed,
+    Failed
 }

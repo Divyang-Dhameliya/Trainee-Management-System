@@ -71,6 +71,7 @@ builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IFileStorageService,LocalFileStorageService>();
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
+builder.Services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
 builder.Services.AddScoped<IPasswordHasher<UserModel>, PasswordHasher<UserModel>>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -81,6 +82,13 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // File Storage Configuration Setup
 builder.Services.Configure<FileStorageOptions> (
     builder.Configuration.GetSection("FileStorage")
+);
+
+// RabbitMq Configuration Setup
+builder.Services.Configure<RabbitMqOptions> (
+    builder.Configuration.GetSection(
+        RabbitMqOptions.SectionName
+    )
 );
 
 // Register DBContext service

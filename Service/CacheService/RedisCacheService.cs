@@ -17,7 +17,7 @@ public class RedisCacheService : ICacheService
     {
         try
         {
-            dynamic? json = await _cache.GetStringAsync(
+            String? json = await _cache.GetStringAsync(
                 key,
                 cancellationToken
             );

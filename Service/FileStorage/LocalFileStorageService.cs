@@ -54,12 +54,12 @@ public class LocalFileStorageService : IFileStorageService
     {
         Directory.CreateDirectory(_options.RootPath);
 
-        dynamic filePath = Path.Combine(
+        string filePath = Path.Combine(
             _options.RootPath,
             storageFileName
         );
 
-        using dynamic fileStream = new FileStream(
+        using FileStream fileStream = new FileStream(
             filePath,
             FileMode.CreateNew
         );

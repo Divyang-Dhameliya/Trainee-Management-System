@@ -9,10 +9,12 @@ public class ReviewService : IReviewService
 {
 
     private readonly AppDbContext _context;
+    private readonly ILogger<ReviewService> _logger;
 
-    public ReviewService(AppDbContext context)
+    public ReviewService(AppDbContext context, ILogger<ReviewService> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<ReviewResponseModel> CreateReview(CreateReviewRequestModel review)
@@ -48,6 +50,7 @@ public class ReviewService : IReviewService
 
         if(review == null)
         {
+            _logger.LogInformation("Review not found with given ID: {Id}", id);
             throw new HttpStatusException(HttpStatusCode.NotFound, "Review not found with given ID.");
         }
 

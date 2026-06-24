@@ -10,10 +10,11 @@ namespace TraineeManagement.Api.Service.MentorService;
 public class MentorService : IMentorService
 {
     private readonly AppDbContext _context;
-
-    public MentorService(AppDbContext context)
+    private readonly ILogger<MentorService> _logger;
+    public MentorService(AppDbContext context, ILogger<MentorService> logger)
     { 
         _context = context; 
+        _logger = logger;
     }
     
     public async Task<List<MentorResponseModel>> GetMentors()
@@ -47,6 +48,7 @@ public class MentorService : IMentorService
 
         if(mentor == null)
         {
+            _logger.LogInformation("Mentor not found with given ID: {Id}", id);
             throw new HttpStatusException(HttpStatusCode.NotFound, "Mentor not found with given ID.");
         }
 
@@ -94,6 +96,7 @@ public class MentorService : IMentorService
 
         if (mentor == null)
         {
+            _logger.LogInformation("Mentor not found with given ID: {Id}", id);
             throw new HttpStatusException(HttpStatusCode.NotFound, "Mentor not found with given ID.");
         }
 
@@ -124,7 +127,8 @@ public class MentorService : IMentorService
 
         if (mentor == null)
         {
-            throw new HttpStatusException(HttpStatusCode.NotFound, "Trainee not found with given ID.");
+            _logger.LogInformation("Mentor not found with given ID: {Id}", id);
+            throw new HttpStatusException(HttpStatusCode.NotFound, "Mentor not found with given ID.");
         }
 
         _context.Mentors.Remove(mentor);

@@ -82,6 +82,7 @@ public class SubmissionService : ISubmissionService
 
         if (submission == null)
         {
+            _logger.LogInformation("Submission not found with given ID: {Id}", id);
             throw new HttpStatusException(HttpStatusCode.NotFound, "Submission not found with given ID.");
         }
 
@@ -145,6 +146,7 @@ public class SubmissionService : ISubmissionService
 
         if (submission == null)
         {
+            _logger.LogInformation("Submission not found with given ID: {Id}", submissionId);
             throw new HttpStatusException(HttpStatusCode.NotFound, "Submission not found.");
         }
 
@@ -152,11 +154,13 @@ public class SubmissionService : ISubmissionService
 
         if(file.Length == 0)
         {
+             _logger.LogInformation("Uploaded Empty File.");
             throw new HttpStatusException(HttpStatusCode.BadRequest, "Uploaded File is Empty.");    
         }
 
         if (!_options.AllowedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
         {
+             _logger.LogInformation("Invalid file extension: {extension}", extension);
             throw new HttpStatusException(HttpStatusCode.BadRequest, "Invalid file extension.");
         }
 
@@ -164,6 +168,7 @@ public class SubmissionService : ISubmissionService
 
         if (file.Length > maxSizeBytes)
         {
+             _logger.LogInformation("File size exceeds limit. Filesize: {Filesize}", file.Length);
             throw new HttpStatusException(HttpStatusCode.RequestEntityTooLarge, "File Size exceeds limit.");
         }
 
@@ -185,6 +190,7 @@ public class SubmissionService : ISubmissionService
 
             if (duplicateExists)
             {
+                 _logger.LogInformation("An Identical file already exists for this submission. Id: {Id}", submissionId);
                 throw new HttpStatusException(HttpStatusCode.Conflict, "An identical file already exists for this submission.");
             }
 
@@ -265,6 +271,7 @@ public class SubmissionService : ISubmissionService
 
         if (submissionFile == null)
         {
+             _logger.LogInformation("File not Found. ID: {Id}", fileId);
             throw new HttpStatusException(HttpStatusCode.NotFound, "File not found");
         }
 
@@ -275,6 +282,7 @@ public class SubmissionService : ISubmissionService
 
         if (!exists)
         {
+             _logger.LogInformation("File not Found. StorageFileName: {StorageFileName}", submissionFile.StorageFileName);
             throw new HttpStatusException(HttpStatusCode.NotFound, "Physical file not found");
         }
 
@@ -301,6 +309,7 @@ public class SubmissionService : ISubmissionService
 
         if (file == null)
         {
+             _logger.LogInformation("File not found with given ID: {Id}", fileId);
             throw new HttpStatusException(HttpStatusCode.NotFound, "File not found");
         }
 

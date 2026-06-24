@@ -13,10 +13,11 @@ namespace TraineeManagement.Api.Service.LearningTaskService;
 public class LearningTaskService : ILearningTaskService
 {
     private readonly AppDbContext _context;
-
-    public LearningTaskService(AppDbContext context)
+    private readonly ILogger<LearningTaskService> _logger;
+    public LearningTaskService(AppDbContext context, ILogger<LearningTaskService> logger)
     { 
         _context = context; 
+        _logger = logger;
     }
 
     public async Task<List<LearningTaskResponseModel>> GetLearningTasks()
@@ -50,6 +51,7 @@ public class LearningTaskService : ILearningTaskService
 
         if(learningTask == null)
         {
+            _logger.LogInformation("LearningTask not found with given ID: {Id}", id);
             throw new HttpStatusException(HttpStatusCode.NotFound, "LearningTask not found with given ID.");
         }
 
@@ -98,6 +100,7 @@ public class LearningTaskService : ILearningTaskService
 
         if (learningTask == null)
         {
+            _logger.LogInformation("LearningTask not found with given ID: {Id}", id);
             throw new HttpStatusException(HttpStatusCode.NotFound, "LearningTask not found with given ID.");
         }
 
@@ -128,6 +131,7 @@ public class LearningTaskService : ILearningTaskService
 
         if (learningTask == null)
         {
+            _logger.LogInformation("LearningTask not found with given ID: {Id}", id);
             throw new HttpStatusException(HttpStatusCode.NotFound, "LearningTask not found with given ID.");
         }
 

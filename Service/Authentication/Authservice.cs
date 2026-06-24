@@ -27,6 +27,7 @@ public class AuthService : IAuthService
         
         if(userRequestModel.Password == null || userRequestModel.UserName == null)
         {
+            _logger.LogInformation("Username & Password is required.");
             throw new HttpStatusException(HttpStatusCode.BadRequest,"Username and Password is Required");
         }
 
@@ -36,6 +37,7 @@ public class AuthService : IAuthService
 
         if(user != null)
         {
+            _logger.LogInformation("User already Exists.");
             throw new HttpStatusException(HttpStatusCode.BadRequest,"User Already Exists, Proceed with Login.");
         }
 
@@ -69,6 +71,7 @@ public class AuthService : IAuthService
 
         if(user == null || userRequestModel.Password == null || user.UserName == null)
         {
+            _logger.LogError("Invalid Credentials Username: {Username}, Password: {Password}", userRequestModel.UserName, userRequestModel.Password);
             throw new HttpStatusException(HttpStatusCode.BadRequest,"Invalid Credentials");
         }
 
@@ -76,6 +79,7 @@ public class AuthService : IAuthService
 
         if(!isValidPassword)
         {
+            _logger.LogInformation("Invalid Credentials Username: {Username}, Password: {Password}", userRequestModel.UserName, userRequestModel.Password);
             throw new HttpStatusException(HttpStatusCode.Unauthorized,"Invalid Credentials");
         }
 

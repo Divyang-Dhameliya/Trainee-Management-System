@@ -148,6 +148,7 @@ public class TraineeService : ITraineeService
         
         if(trainee == null)
         {
+            _logger.LogInformation("Trainee not found with given ID: {Id}", id);
             throw new HttpStatusException(HttpStatusCode.NotFound, "Trainee not found with given ID.");
         }
 
@@ -203,6 +204,7 @@ public class TraineeService : ITraineeService
 
         if (trainee == null)
         {
+            _logger.LogInformation("Trainee not found with given ID: {Id}", id);
             throw new HttpStatusException(HttpStatusCode.NotFound, "Trainee not found with given ID.");
         }
 
@@ -236,6 +238,7 @@ public class TraineeService : ITraineeService
 
         if (trainee == null)
         {
+            _logger.LogInformation("Trainee not found with given ID: {Id}", id);
             throw new HttpStatusException(HttpStatusCode.NotFound, "Trainee not found with given ID.");
         }
 

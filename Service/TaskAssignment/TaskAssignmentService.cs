@@ -24,7 +24,8 @@ public class TaskAssignmentService : ITaskAssignmentService
     {
         if(taskAssignment.AssignedDate > taskAssignment.DueDate)
         {
-            throw new Exception("DueDate should not be before AssignedDate.");
+            _logger.LogInformation("DueDate should not be before AssignedDate. DueDate: {DueDate} AssinedDate: {AssignedDate}", taskAssignment.DueDate, taskAssignment.AssignedDate);
+            throw new HttpStatusException(HttpStatusCode.BadRequest, "DueDate should not be before AssignedDate.");
         }
 
         TaskAssignmentModel newTaskAssignment = new TaskAssignmentModel(
@@ -74,6 +75,7 @@ public class TaskAssignmentService : ITaskAssignmentService
 
         if(taskAssignment == null)
         {
+            _logger.LogInformation("TaskAssignment not found with given ID: {Id}", id);
             throw new HttpStatusException(HttpStatusCode.NotFound, "TaskAssignment not found with given ID.");
         }
 
@@ -138,6 +140,7 @@ public class TaskAssignmentService : ITaskAssignmentService
 
         if (taskAssignment == null)
         {
+            _logger.LogInformation("TaskAssignment not found with given ID: {Id}", id);
             throw new HttpStatusException(HttpStatusCode.NotFound, "TaskAssignment not found with given ID.");
         }
 

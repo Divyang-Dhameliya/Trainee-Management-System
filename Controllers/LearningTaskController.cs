@@ -10,42 +10,32 @@ namespace TraineeManagement.Api.Controllers;
 public class LearningTaskController : ControllerBase
 {
     private readonly ILearningTaskService _learningTaskService;
-    private readonly ILogger<LearningTaskController> _logger;
 
-    public LearningTaskController(ILearningTaskService learningTaskService, ILogger<LearningTaskController> logger)
+    public LearningTaskController(ILearningTaskService learningTaskService)
     {
         _learningTaskService = learningTaskService;
-        _logger = logger;
     }
 
     [HttpGet]
     public async Task<IActionResult> Get()
     {
-        _logger.LogInformation("HTTP GET received for getLearningTasks."); 
-
         List <LearningTaskResponseModel> LearningTasks = await _learningTaskService.GetLearningTasks();
-            
-        _logger.LogInformation("GetLearningTasks completed successfully.");
-            
+                        
         return Ok(LearningTasks);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Get([FromRoute] long id)
     {
-        _logger.LogInformation("HTTP GET received for getLearningTaskByID. LearningTaskId: {LearningTaskid}", id); 
         LearningTaskResponseModel? LearningTask = await _learningTaskService.GetLearningTaskById(id);
 
-        _logger.LogInformation("GetLearningTaskByID completed successfully.");
         return Ok(LearningTask);
     }
 
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] CreateLearningTaskRequestModel LearningTask)
     {
-        _logger.LogInformation("HTTP POST received for CreateLearningTask.");
         LearningTaskResponseModel newLearningTask = await _learningTaskService.CreateLearningTask(LearningTask);
-        _logger.LogInformation("HTTP POST CreateLearningTask completed successfully.");
 
         return Ok(newLearningTask);
     }
@@ -53,22 +43,15 @@ public class LearningTaskController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(long id)
     {
-        _logger.LogInformation("HTTP DELETE received for LearningTaskID : {LearningTaskid}", id);
-
         await _learningTaskService.DeleteLearningTask(id);
 
-        _logger.LogInformation("DeleteByID completed successfully");
         return NoContent();
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(long id, UpdateLearningTaskRequestModel updateLearningTaskRequest)
     {
-        _logger.LogInformation("HTTP PUT received for UpdateLearningTask.");
-
         LearningTaskResponseModel? LearningTask = await _learningTaskService.UpdateLearningTask(id, updateLearningTaskRequest);
-
-        _logger.LogInformation("HTTP PUT UpdateLearningTask completed successfully.");
 
         return Ok(LearningTask);
     }

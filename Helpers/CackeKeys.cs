@@ -1,6 +1,6 @@
 public static class CacheKeys
 {
-    public static string SubmissionSummery(long id) => $"Submission-summary:{id}";
+    public static string SubmissionSummary(long id) => $"Submission-Summary:{id}";
 
     public static string Trainee(long id) => $"Trainee:{id}";
 

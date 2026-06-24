@@ -4,7 +4,7 @@ namespace TraineeManagement.Api.Helpers;
 
 public static class ChecksumHelper
 {
-    public async static Task<string> computeAync(Stream stream, CancellationToken cancellationToken)
+    public async static Task<string> ComputeAsync(Stream stream, CancellationToken cancellationToken)
     {
         using SHA256 sha256 = SHA256.Create();
 

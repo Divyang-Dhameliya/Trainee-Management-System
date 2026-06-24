@@ -64,7 +64,7 @@ public class SubmissionService : ISubmissionService
 
     public async Task<SubmissionResponseModel?> GetSubmissionById(long id)
     {
-        string cacheKey = CacheKeys.SubmissionSummery(id);
+        string cacheKey = CacheKeys.SubmissionSummary(id);
 
         SubmissionResponseModel? cachedSubmission = await _cacheService.GetAsync<SubmissionResponseModel>(cacheKey);
 
@@ -168,7 +168,7 @@ public class SubmissionService : ISubmissionService
 
             await using (Stream stream = file.OpenReadStream())
             {
-                checksum = await ChecksumHelper.computeAync(stream, cancellationToken);
+                checksum = await ChecksumHelper.ComputeAsync(stream, cancellationToken);
             }
 
             bool duplicateExists = await _context.SubmissionFiles.AnyAsync(
@@ -213,7 +213,7 @@ public class SubmissionService : ISubmissionService
             SubmissionProcessingRequested message = new SubmissionProcessingRequested
             {
                 MessageId = Guid.NewGuid(),
-                CorrealtionId = Guid.NewGuid(),
+                CorrelationId = Guid.NewGuid(),
                 SubmissionId = submissionId,
                 FileId = submissionFile.Id,
                 RequestedAt = DateTime.UtcNow
@@ -222,9 +222,9 @@ public class SubmissionService : ISubmissionService
             await _messagePublisher.PublishAsync(message);
 
             _logger.LogInformation(
-                "Submission processing message published. MessageId: {MessageId}, CorrealtionId: {CorrealtionId}, SubmissionId: {SubmisssionId}, FileId: {FileId}",
+                "Submission processing message published. MessageId: {MessageId}, CorrelationId: {CorrelationId}, SubmissionId: {SubmisssionId}, FileId: {FileId}",
                 message.MessageId,
-                message.CorrealtionId,
+                message.CorrelationId,
                 message.SubmissionId,
                 message.FileId
             );

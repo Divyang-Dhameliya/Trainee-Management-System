@@ -1,7 +1,7 @@
 public class SubmissionProcessingRequested
 {
     public Guid MessageId { get; set; }
-    public Guid CorrealtionId { get; set; }
+    public Guid CorrelationId { get; set; }
     public long SubmissionId { get; set; }
     public long FileId { get; set; }
     public DateTime RequestedAt { get; set; }

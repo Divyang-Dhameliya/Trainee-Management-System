@@ -40,6 +40,8 @@ public class TaskAssignmentService : ITaskAssignmentService
         _context.TaskAssignments.Add(newTaskAssignment);
         await _context.SaveChangesAsync();
 
+        await _cacheService.RemoveAsync(CacheKeys.TaskAssignmentsAll);
+
         TaskAssignmentResponseModel TaskAssignmentResponseModel = new TaskAssignmentResponseModel(
             newTaskAssignment.Id,
             newTaskAssignment.TraineeId,

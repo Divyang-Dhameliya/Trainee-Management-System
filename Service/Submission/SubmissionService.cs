@@ -50,6 +50,8 @@ public class SubmissionService : ISubmissionService
         _context.Submissions.Add(newSubmission);
         await _context.SaveChangesAsync();
 
+        await _cacheService.RemoveAsync(CacheKeys.SubmissionsAll);
+
         SubmissionResponseModel SubmissionResponseModel = new SubmissionResponseModel(
             newSubmission.Id,
             newSubmission.TaskAssignmentId,
@@ -147,6 +149,11 @@ public class SubmissionService : ISubmissionService
         }
 
         string extension = Path.GetExtension(file.FileName);
+
+        if(file.Length == 0)
+        {
+            throw new HttpStatusException(HttpStatusCode.BadRequest, "Uploaded File is Empty.");    
+        }
 
         if (!_options.AllowedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
         {

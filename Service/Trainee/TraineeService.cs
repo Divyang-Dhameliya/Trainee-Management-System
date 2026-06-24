@@ -181,6 +181,8 @@ public class TraineeService : ITraineeService
         _context.Trainees.Add(newTrainee);
         await _context.SaveChangesAsync();
 
+        await _cacheService.RemoveAsync(CacheKeys.TraineesAll);
+
         TraineeResponseModel TraineeResponseModel = new TraineeResponseModel(
             newTrainee.Id,
             newTrainee.FirstName,

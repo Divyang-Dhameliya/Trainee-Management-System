@@ -19,6 +19,8 @@ using TraineeManagement.Api.Service.PasswordService;
 using TraineeManagement.Api.Service.TaskAssignmentInterface;
 using TraineeManagement.Api.Service.SubmissionInterface;
 using TraineeManagement.Api.Service.ReviewInterface;
+using Polly;
+using System.Net;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -112,6 +114,34 @@ builder.Services.AddCors(options =>
 builder.Services.AddStackExchangeRedisCache(options =>
 { 
     options.Configuration = builder.Configuration["Redis:ConnectionString"];
+});
+
+// Inter-Service Communication Setup
+builder.Services.AddHttpClient<TraineeProfileClient>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5002");              
+})
+.AddStandardResilienceHandler(options =>
+{
+    // Finite Timeouts Config
+    options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(10); 
+    options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(3);       
+
+    // Safe Conditional Retries (Only transient errors)
+    options.Retry.MaxRetryAttempts = 3;
+    options.Retry.BackoffType = DelayBackoffType.Exponential;
+    options.Retry.UseJitter = true; 
+    options.Retry.ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+        .HandleResult(response => 
+            response.StatusCode >= HttpStatusCode.InternalServerError || 
+            response.StatusCode == HttpStatusCode.RequestTimeout ||     
+            response.StatusCode == HttpStatusCode.TooManyRequests);      
+
+    // Circuit Breaker Configuration
+    options.CircuitBreaker.FailureRatio = 0.5; 
+    options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(30);
+    options.CircuitBreaker.MinimumThroughput = 8;
+    options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15); 
 });
     
 var app = builder.Build();

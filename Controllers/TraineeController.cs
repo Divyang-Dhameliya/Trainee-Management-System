@@ -11,10 +11,12 @@ namespace TraineeManagement.Api.Controllers;
 public class TraineeController : ControllerBase
 {
     private readonly ITraineeService _traineeService;
+    private readonly TraineeProfileClient _traineeProfileService;
 
-    public TraineeController(ITraineeService traineeService)
+    public TraineeController(ITraineeService traineeService, TraineeProfileClient traineeProfileService)
     {
         _traineeService = traineeService;
+        _traineeProfileService = traineeProfileService;
     }
 
     [HttpGet]
@@ -62,5 +64,13 @@ public class TraineeController : ControllerBase
         TraineeResponseModel? trainee = await _traineeService.UpdateTrainee(id, updateTraineeRequest);
 
         return Ok(trainee);
+    }
+
+    [HttpGet("{id}/dispatch")] // InterService Communication
+    public async Task<IActionResult> DispatchTraineeRequest(int id , CancellationToken cancellationToken)
+    {
+
+        TraineeProfileResponse? result = await _traineeProfileService.FetchTraineProfileById(id, cancellationToken);
+        return Ok(result);
     }
 }

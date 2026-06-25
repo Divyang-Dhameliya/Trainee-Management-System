@@ -11,5 +11,5 @@ public static class SubmissionConstants
     public const string NotesMaxLengthErrorMessage = "Notes can't have more than 50 characters";
     public const string SubmittedDateRequiredErrorMessage = "SubmittedDate is required";
     public const string StatusRequiredErrorMessage = "Status is required";
-    public const string StatusValidateErrorMessage = "Submission status can be either Assigned / InProgress / Submitted / Reviewed / Completed";
+    public const string StatusValidateErrorMessage = "Submission status can be either Submitted / Resubmitted / Queued / Processing / Completed or Failed";
 }

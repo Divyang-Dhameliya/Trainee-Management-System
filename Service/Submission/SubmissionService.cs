@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using TraineeManagement.Api.Data;
 using TraineeManagement.Api.DTO.SubmissionDTO;
 using TraineeManagement.Api.DTO.SubmissionFileDTO;
+using TraineeManagement.Api.Enum.ProcessingJob;
 using TraineeManagement.Api.Enum.Submission;
 using TraineeManagement.Api.Helpers;
 using TraineeManagement.Api.Models;
@@ -19,14 +20,15 @@ public class SubmissionService : ISubmissionService
     private readonly ILogger<SubmissionService> _logger;
     private readonly ICacheService _cacheService;
     private readonly IMessagePublisher _messagePublisher;
-
+    private readonly IProcessingJobService _proceessingJobService;
     public SubmissionService(
         AppDbContext context,
         IOptions<FileStorageOptions> options, 
         IFileStorageService fileStorageService, 
         ILogger<SubmissionService> logger, 
         ICacheService cacheService,
-        IMessagePublisher messagePublisher
+        IMessagePublisher messagePublisher,
+        IProcessingJobService processingJobService
     )
     {
         _context = context;
@@ -35,6 +37,7 @@ public class SubmissionService : ISubmissionService
         _logger = logger;
         _cacheService = cacheService;
         _messagePublisher = messagePublisher;
+        _proceessingJobService = processingJobService;
     }
 
     public async Task<SubmissionResponseModel> CreateSubmission(CreateSubmissionRequestModel submission)
@@ -188,11 +191,11 @@ public class SubmissionService : ISubmissionService
                 file.Checksum == checksum
             );
 
-            if (duplicateExists)
-            {
-                 _logger.LogInformation("An Identical file already exists for this submission. Id: {Id}", submissionId);
-                throw new HttpStatusException(HttpStatusCode.Conflict, "An identical file already exists for this submission.");
-            }
+            // if (duplicateExists)
+            // {
+            //      _logger.LogInformation("An Identical file already exists for this submission. Id: {Id}", submissionId);
+            //     throw new HttpStatusException(HttpStatusCode.Conflict, "An identical file already exists for this submission.");
+            // }
 
             await using (Stream stream = file.OpenReadStream())
             {
@@ -223,19 +226,33 @@ public class SubmissionService : ISubmissionService
 
             await _context.SaveChangesAsync(cancellationToken);
 
+            Guid correlationId = Guid.NewGuid();
+
+            await _proceessingJobService.CreateProcessingJob(
+                new ProcessingJobModel
+                {
+                    Status = ProcessingJobEnum.Queued,
+                    Attempts = 0,
+                    CorrelationId = correlationId,
+                    StartedAt = DateTime.UtcNow
+                }
+            );
+
             SubmissionProcessingRequested message = new SubmissionProcessingRequested
             {
                 MessageId = Guid.NewGuid(),
-                CorrelationId = Guid.NewGuid(),
+                CorrelationId = correlationId,
                 SubmissionId = submissionId,
                 FileId = submissionFile.Id,
+                // FileId = 1000,
                 RequestedAt = DateTime.UtcNow
             };
 
             await _messagePublisher.PublishAsync(message);
 
+
             _logger.LogInformation(
-                "Submission processing message published. MessageId: {MessageId}, CorrelationId: {CorrelationId}, SubmissionId: {SubmisssionId}, FileId: {FileId}",
+                "Submission processing message published & ProcessingJob Created. MessageId: {MessageId}, CorrelationId: {CorrelationId}, SubmissionId: {SubmisssionId}, FileId: {FileId}",
                 message.MessageId,
                 message.CorrelationId,
                 message.SubmissionId,

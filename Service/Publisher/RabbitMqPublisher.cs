@@ -26,12 +26,22 @@ public class RabbitMqPublisher : IMessagePublisher
         using var connection = await factory.CreateConnectionAsync();
         using var channel = await connection.CreateChannelAsync();
 
+        string dlxExchange = "orders.dlx";
+
+        var queueArguments = new Dictionary<string, object?>
+        {
+            { "x-queue-type", "quorum" },
+            { "x-delivery-limit", 2 }, 
+            { "x-dead-letter-exchange", dlxExchange },
+            { "x-dead-letter-routing-key", _options.QueueName }
+        };
+
         await channel.QueueDeclareAsync(
             queue: _options.QueueName,
             durable: true,
             exclusive: false,
             autoDelete: false,
-            arguments: null
+            arguments: queueArguments
         );
 
         var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));

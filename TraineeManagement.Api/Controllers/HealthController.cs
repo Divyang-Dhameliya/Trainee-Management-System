@@ -26,13 +26,13 @@ public class HealthController : ControllerBase
         });
     }
 
-    [HttpGet("status")]
+    [HttpGet("ready")]
     [Authorize(Roles = "Admin")] 
-    public async Task<IActionResult> GetSystemStatus(CancellationToken ct)
+    public async Task<IActionResult> GetSystemDependenciesStatus(CancellationToken cancellationToken)
     {
         HealthReport report = await _healthCheckService.CheckHealthAsync(
             predicate: check => check.Tags.Contains("ready"), 
-            cancellationToken: ct
+            cancellationToken: cancellationToken
         );
 
         var clientResponse = new
@@ -52,5 +52,12 @@ public class HealthController : ControllerBase
         }
 
         return Ok(clientResponse);
+    }
+
+    [HttpGet("live")]
+    [Authorize(Roles = "Admin")] 
+    public async Task<IActionResult> GetSystemStatus(CancellationToken cancellationToken)
+    {
+        return Ok("Server running.");
     }
 }

@@ -44,9 +44,14 @@ public class SubmissionController : ControllerBase
     [HttpPost("/api/submissions/{submissionId}/files")]
     public async Task<IActionResult> Upload(long submissionId, [FromForm] IFormFile File, CancellationToken cancellationToken)
     {
+        Guid correlationId = HttpContext.Items["X-Correlation-ID"] is Guid existingGuid 
+            ? existingGuid 
+            : Guid.NewGuid();
+
         SubmissionFileResponseModel result = await _submissionService.UploadAsync(
             submissionId,
             File,
+            correlationId,
             cancellationToken
         );
 

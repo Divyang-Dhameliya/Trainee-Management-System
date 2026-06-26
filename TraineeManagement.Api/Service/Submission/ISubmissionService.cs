@@ -11,7 +11,7 @@ public interface ISubmissionService
 
     Task<SubmissionResponseModel> CreateSubmission(CreateSubmissionRequestModel Submission);
 
-    Task<SubmissionFileResponseModel> UploadAsync(long submissionId, IFormFile file, CancellationToken cancellationToken);
+    Task<SubmissionFileResponseModel> UploadAsync(long submissionId, IFormFile file, Guid CorrelationId, CancellationToken cancellationToken);
 
     Task<DownloadSubmissionFileResponseModel> DownloadAsync(long fileId, CancellationToken cancellationToken = default);
 

@@ -21,6 +21,9 @@ using TraineeManagement.Api.Service.SubmissionInterface;
 using TraineeManagement.Api.Service.ReviewInterface;
 using Polly;
 using System.Net;
+using TraineeManagement.Api.Middleware;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using RabbitMQ.Client;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -143,8 +146,32 @@ builder.Services.AddHttpClient<TraineeProfileClient>(client =>
     options.CircuitBreaker.MinimumThroughput = 8;
     options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(15); 
 });
+
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "live" })    
+    .AddMySql(
+        connectionString: builder.Configuration.GetConnectionString("DefaultConnection")!,
+        name: "mysql-db",
+        tags: new[] { "ready" })
+    
+    .AddRedis(
+        redisConnectionString: builder.Configuration.GetConnectionString("RedisConnection")!,
+        name: "redis-cache",
+        tags: new[] { "ready" })
+    
+    .AddRabbitMQ(
+        factory: sp => new ConnectionFactory
+        {
+            Uri = new Uri($"amqp://{builder.Configuration["RabbitMq:Username"]}:{builder.Configuration["RabbitMq:Password"]}@{builder.Configuration["RabbitMq:Host"]}:{builder.Configuration["RabbitMq:Port"] ?? "5672"}/"),
+            AutomaticRecoveryEnabled = true
+        }.CreateConnectionAsync().GetAwaiter().GetResult(),
+        name: "rabbitmq-broker",
+        tags: new[] { "ready" });
+
     
 var app = builder.Build();
+
+app.UseMiddleware<CorrelationIdMiddleware>();
 
 app.UseExceptionHandler(); 
 app.UseAuthentication(); 

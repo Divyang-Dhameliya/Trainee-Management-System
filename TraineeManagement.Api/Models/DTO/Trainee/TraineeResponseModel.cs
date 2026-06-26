@@ -1,0 +1,39 @@
+using TraineeManagement.Api.Enum.Trainee;
+
+namespace TraineeManagement.Api.DTO.TraineeDTO;
+
+public class TraineeResponseModel
+{
+    public long Id { get; set; }
+
+    public string? FirstName { get; set; }
+
+    public string? LastName { get; set; }
+
+    public string? Email { get; set; }
+
+    public string? TechStack { get; set; }
+
+    public TraineeStatus? Status { get; set; }
+
+    public DateTime CreatedDate { get; set; }
+
+    public DateTime UpdatedDate { get; set; }
+
+    public TraineeResponseModel(long id, string? firstName, string? lastName, string? email, string? techstack, TraineeStatus? status, DateTime createdDate, DateTime updatedDate)
+    {
+        Id = id;
+        FirstName = firstName;
+        LastName = lastName;
+        Email = email;
+        TechStack = techstack;
+        Status = status;
+        CreatedDate = createdDate;
+        UpdatedDate = updatedDate;
+    }
+
+    public static implicit operator Task<object>(TraineeResponseModel v)
+    {
+        throw new NotImplementedException();
+    }
+}

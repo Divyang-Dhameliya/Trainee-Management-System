@@ -142,6 +142,14 @@ public class SubmissionService : ISubmissionService
 
     public async Task<SubmissionFileResponseModel> UploadAsync(long submissionId, IFormFile file, CancellationToken cancellationToken)
     {
+        Guid correlationId = Guid.NewGuid();
+    
+        _logger.LogInformation("Upload request received. CorrelationId: {CorrelationId}, SubmissionId: {SubmissionId}, FileName: {FileName}",
+            correlationId,
+            submissionId,
+            file.FileName
+        );
+
         SubmissionModel? submission = await _context.Submissions.FirstOrDefaultAsync(
             submission => submission.Id == submissionId,
             cancellationToken
@@ -149,7 +157,11 @@ public class SubmissionService : ISubmissionService
 
         if (submission == null)
         {
-            _logger.LogInformation("Submission not found with given ID: {Id}", submissionId);
+            _logger.LogWarning("Submission Not Found with given Id. CorrelationId : {CorrelationId}, SubmissionId: {SubmissionId}, FileName: {FileName}",
+                correlationId,
+                submissionId,
+                file.FileName
+            );
             throw new HttpStatusException(HttpStatusCode.NotFound, "Submission not found.");
         }
 
@@ -157,13 +169,22 @@ public class SubmissionService : ISubmissionService
 
         if(file.Length == 0)
         {
-             _logger.LogInformation("Uploaded Empty File.");
+            _logger.LogWarning("Uploaded File is Empty. CorrelationId: {CorrelationId}, SubmissionId: {SubmissionId}, FileName: {FileName}",
+                correlationId,
+                submissionId,
+                file.FileName
+            );
             throw new HttpStatusException(HttpStatusCode.BadRequest, "Uploaded File is Empty.");    
         }
 
         if (!_options.AllowedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
         {
-             _logger.LogInformation("Invalid file extension: {extension}", extension);
+            _logger.LogWarning("Invalid File Extension. CorrelationId: {CorrelationId}, Extension : {Extension}, SubmissionId: {SubmissionId}, FileName: {FileName}",
+                correlationId,
+                extension,
+                submissionId,
+                file.FileName
+            );
             throw new HttpStatusException(HttpStatusCode.BadRequest, "Invalid file extension.");
         }
 
@@ -171,7 +192,12 @@ public class SubmissionService : ISubmissionService
 
         if (file.Length > maxSizeBytes)
         {
-             _logger.LogInformation("File size exceeds limit. Filesize: {Filesize}", file.Length);
+            _logger.LogWarning("File-Size Limit exceeds. CorrelationId: {CorrelationId}, UploadedFileSize: {UploadedFileSize}, SubmissionId: {SubmissionId}, FileName: {FileName}",
+                correlationId,
+                file.Length,
+                submissionId,
+                file.FileName
+            );
             throw new HttpStatusException(HttpStatusCode.RequestEntityTooLarge, "File Size exceeds limit.");
         }
 
@@ -191,11 +217,16 @@ public class SubmissionService : ISubmissionService
                 file.Checksum == checksum
             );
 
-            // if (duplicateExists)
-            // {
-            //      _logger.LogInformation("An Identical file already exists for this submission. Id: {Id}", submissionId);
-            //     throw new HttpStatusException(HttpStatusCode.Conflict, "An identical file already exists for this submission.");
-            // }
+            if (duplicateExists)
+            {
+                _logger.LogWarning("Duplicate File detected for same submission. CorrelationId: {CorrelationId}, Checksum: {Checksum}, SubmissionId: {SubmissionId}, FileName: {FileName}",
+                    correlationId,
+                    checksum,
+                    submissionId,
+                    file.FileName
+                );
+                throw new HttpStatusException(HttpStatusCode.Conflict, "An identical file already exists for this submission.");
+            }
 
             await using (Stream stream = file.OpenReadStream())
             {
@@ -206,6 +237,12 @@ public class SubmissionService : ISubmissionService
                 );
             }
 
+            _logger.LogWarning("File stored successfully. CorrelationId: {CorrelationId}, SubmissionId: {SubmissionId}, StorageFileName: {StorageFileName}",
+                correlationId,
+                submissionId,
+                storageFileName
+            );
+            
             SubmissionFile submissionFile = new SubmissionFile
             {
                 OriginalFileName = file.FileName,
@@ -226,7 +263,11 @@ public class SubmissionService : ISubmissionService
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            Guid correlationId = Guid.NewGuid();
+            _logger.LogWarning("SubmissionFile metadata persisted. CorrelationId: {CorrelationId}, SubmissionId: {SubmissionId}, FileName: {FileName}",
+                correlationId,
+                submissionId,
+                file.FileName
+            );
 
             await _proceessingJobService.CreateProcessingJob(
                 new ProcessingJobModel
@@ -252,9 +293,9 @@ public class SubmissionService : ISubmissionService
 
 
             _logger.LogInformation(
-                "Submission processing message published & ProcessingJob Created. MessageId: {MessageId}, CorrelationId: {CorrelationId}, SubmissionId: {SubmisssionId}, FileId: {FileId}",
-                message.MessageId,
+                "Submission processing message published & ProcessingJob persisted. CorrelationId: {CorrelationId}, MessageId: {MessageId}, SubmissionId: {SubmisssionId}, FileId: {FileId}",
                 message.CorrelationId,
+                message.MessageId,
                 message.SubmissionId,
                 message.FileId
             );

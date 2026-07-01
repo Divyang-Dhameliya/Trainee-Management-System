@@ -1,0 +1,195 @@
+version: "3.9"
+ 
+services:
+ 
+  mysql:
+    image: docker-registry-002.zeuslearning.com/zeuslearning/mysql:latest
+    container_name: mysql
+ 
+    restart: unless-stopped
+ 
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+ 
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s 
+
+    volumes:
+      - mysql-data:/var/lib/mysql
+ 
+  redis:
+    image: docker-registry-002.zeuslearning.com/zeuslearning/redis
+ 
+    container_name: redis
+ 
+    restart: unless-stopped
+ 
+    ports:
+      - "6379:6379"
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+ 
+  rabbitmq:
+    image: docker-registry-002.zeuslearning.com/zeuslearning/rabbitmq
+ 
+    container_name: rabbitmq
+ 
+    restart: unless-stopped
+    command: sh -c "rabbitmq-plugins enable --offline rabbitmq_management && rabbitmq-server"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  trainingdirectory.api:
+ 
+    build:
+      context: ./TrainingDirectory.Api
+      dockerfile: Dockerfile
+      secrets:
+        - aws_token
+
+    container_name: trainingdirectory.api.container
+ 
+    ports:
+      - "8081:8080"
+ 
+    environment:
+ 
+      ASPNETCORE_ENVIRONMENT: Docker
+  
+  traineemanagement.api:
+ 
+    build:
+      context: ./TraineeManagement.Api
+      dockerfile: Dockerfile
+      secrets:
+        - aws_token
+
+    container_name: traineemanagement.api.container
+ 
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+         
+    ports:
+      - "8080:8080"
+
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      
+      # ConnectionStrings section
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=${MYSQL_DATABASE};User=root;Password=${MYSQL_ROOT_PASSWORD};
+      - ConnectionStrings__RedisConnection=${REDIS_CONNECTION_STRING}
+      
+      # JwtSettings section
+      - JwtSettings__SecretKey=${JWT_SECRET_KEY}
+      - JwtSettings__Issuer=${JWT_ISSUER}
+      - JwtSettings__Audience=${JWT_AUDIENCE}
+      - JwtSettings__ExpiryMinutes=${JWT_EXPIRY_MINUTES}
+      
+      # FileStorage section
+      - FileStorage__RootPath=${FILE_STORAGE_ROOT_PATH}
+      - FileStorage__MaxFileSizeMb=${FILE_MAX_SIZE_MB}
+      
+      # FIXED: Added the complete indexed array mappings for AllowedExtensions
+      - FileStorage__AllowedExtensions__0=${ALLOWED_EXT_0}
+      - FileStorage__AllowedExtensions__1=${ALLOWED_EXT_1}
+      - FileStorage__AllowedExtensions__2=${ALLOWED_EXT_2}
+      - FileStorage__AllowedExtensions__3=${ALLOWED_EXT_3}
+      
+      # Redis section
+      - Redis__ConnectionString=${REDIS_CONNECTION_STRING}
+      
+      # RabbitMq section
+      - RabbitMq__Host=${RABBITMQ_HOST}
+      - RabbitMq__Port=5672
+      - RabbitMq__Username=${RABBITMQ_USER}
+      - RabbitMq__Password=${RABBITMQ_PASS}
+      - RabbitMq__QueueName=${RABBITMQ_QUEUE_NAME}
+
+      # Inter service communication section
+      - InterserviceUrls__TraineeDirectory=${TRAINING_DIRECTORY_API_URL}
+
+    volumes:
+      - uploads:${FILE_STORAGE_ROOT_PATH}
+ 
+  submisionprocessor.worker:
+ 
+    build:
+      context: .
+      dockerfile: ./SubmisionProcessor.Worker/Dockerfile
+      secrets:
+        - aws_token
+        
+    container_name: submisionprocessor.worker.container
+ 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      
+      # Maps to Logging section
+      - Logging__LogLevel__Default=Information
+      - Logging__LogLevel__Microsoft.Hosting.Lifetime=Information
+
+      # Maps to FileStorage section (points directly to the shared volume mount directory)
+      - FileStorage__RootPath=${WORKER_STORAGE_ROOT_PATH}
+      - FileStorage__MaxFileSizeMb=10
+ 
+      # Maps the array list elements for file types sequentially
+      - FileStorage__AllowedExtensions__0=${ALLOWED_EXT_0}
+      - FileStorage__AllowedExtensions__1=${ALLOWED_EXT_1}
+      - FileStorage__AllowedExtensions__2=${ALLOWED_EXT_2}
+      - FileStorage__AllowedExtensions__3=${ALLOWED_EXT_3}
+
+      # Maps to RabbitMq section
+      - RabbitMq__Host=${RABBITMQ_HOST}
+      - RabbitMq__Port=5672
+      - RabbitMq__Username=${RABBITMQ_USER}
+      - RabbitMq__Password=${RABBITMQ_PASS}
+      - RabbitMq__QueueName=${RABBITMQ_QUEUE_NAME}
+
+      # Maps to ConnectionStrings section
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=${MYSQL_DATABASE};User=root;Password=${MYSQL_ROOT_PASSWORD};
+    
+    volumes:
+      - uploads:${WORKER_STORAGE_ROOT_PATH}
+ 
+volumes:
+ 
+  mysql-data:
+  uploads:
+
+secrets:
+  aws_token:
+    environment: MY_AWS_TOKEN

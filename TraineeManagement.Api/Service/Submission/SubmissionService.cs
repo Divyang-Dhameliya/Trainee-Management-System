@@ -215,16 +215,16 @@ public class SubmissionService : ISubmissionService
                 file.Checksum == checksum
             );
 
-            // if (duplicateExists)
-            // {
-            //     _logger.LogWarning("Duplicate File detected for same submission. CorrelationId: {CorrelationId}, Checksum: {Checksum}, SubmissionId: {SubmissionId}, FileName: {FileName}",
-            //         correlationId,
-            //         checksum,
-            //         submissionId,
-            //         file.FileName
-            //     );
-            //     throw new HttpStatusException(HttpStatusCode.Conflict, "An identical file already exists for this submission.");
-            // }
+            if (duplicateExists)
+            {
+                _logger.LogWarning("Duplicate File detected for same submission. CorrelationId: {CorrelationId}, Checksum: {Checksum}, SubmissionId: {SubmissionId}, FileName: {FileName}",
+                    correlationId,
+                    checksum,
+                    submissionId,
+                    file.FileName
+                );
+                throw new HttpStatusException(HttpStatusCode.Conflict, "An identical file already exists for this submission.");
+            }
 
             await using (Stream stream = file.OpenReadStream())
             {

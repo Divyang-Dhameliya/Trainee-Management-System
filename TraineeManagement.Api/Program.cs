@@ -120,9 +120,12 @@ builder.Services.AddStackExchangeRedisCache(options =>
 });
 
 // Inter-Service Communication Setup
+string identityUrl = builder.Configuration["InterserviceUrls:TraineeDirectory"] 
+    ?? throw new InvalidOperationException("Identity Service URL is missing.");
+
 builder.Services.AddHttpClient<TraineeProfileClient>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5002");              
+    client.BaseAddress = new Uri(identityUrl);
 })
 .AddStandardResilienceHandler(options =>
 {
@@ -193,4 +196,32 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    var context = services.GetRequiredService<AppDbContext>();
+
+    // Try up to 5 times with a delay to allow MySQL time to boot up completely
+    for (int i = 0; i < 5; i++)
+    {
+        try
+        {
+            logger.LogInformation("Attempting to apply database migrations (Attempt {Attempt}/5)...", i + 1);
+            context.Database.Migrate();
+            logger.LogInformation("Database migrations applied successfully!");
+            break; // Exit loop if migration succeeds
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("Database not ready yet. Retrying in 5 seconds...");
+            if (i == 4) // If it fails on the final attempt, log the hard error
+            {
+                logger.LogError(ex, "An error occurred while migrating the database after multiple attempts.");
+            }
+            System.Threading.Thread.Sleep(5000); // Wait 5 seconds before trying again
+        }
+    }
+}
+ 
 app.Run();

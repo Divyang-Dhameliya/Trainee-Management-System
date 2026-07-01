@@ -27,7 +27,6 @@ public class HealthController : ControllerBase
     }
 
     [HttpGet("ready")]
-    [Authorize(Roles = "Admin")] 
     public async Task<IActionResult> GetSystemDependenciesStatus(CancellationToken cancellationToken)
     {
         HealthReport report = await _healthCheckService.CheckHealthAsync(
@@ -55,7 +54,6 @@ public class HealthController : ControllerBase
     }
 
     [HttpGet("live")]
-    [Authorize(Roles = "Admin")] 
     public async Task<IActionResult> GetSystemStatus(CancellationToken cancellationToken)
     {
         return Ok("Server running.");

@@ -53,3 +53,5 @@ Uploads/
 
 bin/
 obj/
+
+.env

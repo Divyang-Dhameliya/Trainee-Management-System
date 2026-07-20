@@ -1,26 +1,25 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using TraineeManagement.Api.DTO.ReviewDTO;
-using TraineeManagement.Api.Service.ReviewInterface;
+using TraineeManagement.Api.DTO.ProcessingJobDTO;
 
 namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
 [Route("/api/processing-jobs")]
-[Authorize]
+[Authorize( Roles = "Admin")]
 public class ProcessingJobController : ControllerBase
 {
-    private readonly IReviewService _reviewService;
+    private readonly IProcessingJobService _processingJobService;
 
-    public ProcessingJobController(IReviewService reviewService)
+    public ProcessingJobController(IProcessingJobService processingJobService)
     {
-        _reviewService = reviewService;
+        _processingJobService = processingJobService;
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Get([FromRoute] long id)
     {
-        ReviewResponseModel? Review = await _reviewService.GetReviewById(id);
+        ProcessingJobResponseModel? Review = await _processingJobService.GetProcessingJobById(id);
 
         return Ok(Review);
     }

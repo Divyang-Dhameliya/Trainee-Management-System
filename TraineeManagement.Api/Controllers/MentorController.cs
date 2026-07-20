@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Authorization;
 using TraineeManagement.Api.Service.MentorInterface;
 using TraineeManagement.Api.Enum.Mentor;
 using TraineeManagement.Api.DTO.MentorDTO;
+using StackExchange.Redis;
 
 namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
 [Route("/api/mentors")]
-[Authorize]
 public class MentorController : ControllerBase
 {
     private readonly IMentorService _mentorService;
@@ -19,6 +19,7 @@ public class MentorController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Get()
     {        
         List <MentorResponseModel> Mentors = await _mentorService.GetMentors();
@@ -27,6 +28,7 @@ public class MentorController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Get([FromRoute] long id)
     {
         MentorResponseModel? Mentor = await _mentorService.GetMentorById(id);
@@ -35,6 +37,7 @@ public class MentorController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Mentor")]
     public async Task<IActionResult> Post([FromBody] CreateMentorRequestModel Mentor)
     {
         MentorResponseModel newMentor = await _mentorService.CreateMentor(Mentor);
@@ -43,6 +46,7 @@ public class MentorController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin,Mentor")]
     public async Task<IActionResult> Delete(long id)
     {
         await _mentorService.DeleteMentor(id);
@@ -51,6 +55,7 @@ public class MentorController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,Mentor")]
     public async Task<IActionResult> Put(long id, UpdateMentorRequestModel updateMentorRequest)
     {
         MentorResponseModel? Mentor = await _mentorService.UpdateMentor(id, updateMentorRequest);

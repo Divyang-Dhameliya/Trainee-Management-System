@@ -6,6 +6,7 @@ namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
 [Route("api/health")]
+[Authorize(Roles = "Admin")]
 public class HealthController : ControllerBase
 {
     private readonly HealthCheckService _healthCheckService;

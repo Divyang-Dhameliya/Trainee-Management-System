@@ -6,7 +6,6 @@ namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
 [Route("/api/learning-tasks")]
-[Authorize]
 public class LearningTaskController : ControllerBase
 {
     private readonly ILearningTaskService _learningTaskService;
@@ -17,6 +16,7 @@ public class LearningTaskController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Mentor")]
     public async Task<IActionResult> Get()
     {
         List <LearningTaskResponseModel> LearningTasks = await _learningTaskService.GetLearningTasks();
@@ -25,6 +25,7 @@ public class LearningTaskController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize]
     public async Task<IActionResult> Get([FromRoute] long id)
     {
         LearningTaskResponseModel? LearningTask = await _learningTaskService.GetLearningTaskById(id);
@@ -33,6 +34,7 @@ public class LearningTaskController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Mentor")]
     public async Task<IActionResult> Post([FromBody] CreateLearningTaskRequestModel LearningTask)
     {
         LearningTaskResponseModel newLearningTask = await _learningTaskService.CreateLearningTask(LearningTask);
@@ -41,6 +43,7 @@ public class LearningTaskController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin,Mentor")]
     public async Task<IActionResult> Delete(long id)
     {
         await _learningTaskService.DeleteLearningTask(id);
@@ -49,6 +52,7 @@ public class LearningTaskController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,Mentor")]
     public async Task<IActionResult> Put(long id, UpdateLearningTaskRequestModel updateLearningTaskRequest)
     {
         LearningTaskResponseModel? LearningTask = await _learningTaskService.UpdateLearningTask(id, updateLearningTaskRequest);

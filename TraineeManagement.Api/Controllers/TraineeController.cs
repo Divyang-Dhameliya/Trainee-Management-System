@@ -3,11 +3,11 @@ using TraineeManagement.Api.DTO.TraineeDTO;
 using TraineeManagement.Api.Service.TraineeeInterface;
 using Microsoft.AspNetCore.Authorization;
 using TraineeManagement.Api.Enum.Trainee;
+using StackExchange.Redis;
 namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
 [Route("/api/trainees")]
-[Authorize]
 public class TraineeController : ControllerBase
 {
     private readonly ITraineeService _traineeService;
@@ -20,6 +20,7 @@ public class TraineeController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Get(int pageNumber=1, int pageSize=5, string? search=null,TraineeStatus status=TraineeStatus.Active)
     {
 
@@ -35,6 +36,7 @@ public class TraineeController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Get([FromRoute] long id)
     {
         TraineeResponseModel? trainee = await _traineeService.GetTraineeById(id);
@@ -43,6 +45,7 @@ public class TraineeController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Trainee")]
     public async Task<IActionResult> Post([FromBody] CreateTraineeRequestModel trainee)
     {
         TraineeResponseModel newtrainee = await _traineeService.CreateTrainee(trainee);
@@ -51,6 +54,7 @@ public class TraineeController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin,Trainee")]
     public async Task<IActionResult> Delete(long id)
     {
         await _traineeService.DeleteTrainee(id);
@@ -59,6 +63,7 @@ public class TraineeController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,Trainee")]
     public async Task<IActionResult> Put(long id,UpdateTraineeRequestModel updateTraineeRequest)
     {
         TraineeResponseModel? trainee = await _traineeService.UpdateTrainee(id, updateTraineeRequest);
@@ -67,6 +72,7 @@ public class TraineeController : ControllerBase
     }
 
     [HttpGet("{id}/dispatch")] // InterService Communication
+    [Authorize(Roles = "Admin,Mentor")]
     public async Task<IActionResult> DispatchTraineeRequest(int id , CancellationToken cancellationToken)
     {
 

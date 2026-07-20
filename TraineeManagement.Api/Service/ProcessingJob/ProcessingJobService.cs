@@ -55,19 +55,4 @@ public class ProcessingJobService : IProcessingJobService
             CompletedAt = processingjob.CompletedAt
         };
     }
-
-    public async Task UpdateProcessingJobById(int id, ProcessingJobEnum status)
-    {
-        ProcessingJobModel? processingjob = await _context.ProcessingJobs.FindAsync(id);
-
-        if(processingjob == null)
-        {
-            _logger.LogInformation("ProcessingJob not found with given ID: {Id}", id);
-            throw new HttpStatusException(HttpStatusCode.NotFound, "ProcessingJob not found with given ID.");
-        }
-
-        processingjob.Status = status;
-
-        await _context.SaveChangesAsync();
-    }
 }

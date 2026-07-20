@@ -7,7 +7,6 @@ namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
 [Route("/api/reviews")]
-[Authorize]
 public class ReviewController : ControllerBase
 {
     private readonly IReviewService _reviewService;
@@ -18,6 +17,7 @@ public class ReviewController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Mentor")]
     public async Task<IActionResult> Get()
     {
         
@@ -27,6 +27,7 @@ public class ReviewController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "Mentor,Trainee")]
     public async Task<IActionResult> Get([FromRoute] long id)
     {
         ReviewResponseModel? Review = await _reviewService.GetReviewById(id);
@@ -35,6 +36,7 @@ public class ReviewController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Mentor")]
     public async Task<IActionResult> Post([FromBody] CreateReviewRequestModel Review)
     {
         ReviewResponseModel newReview = await _reviewService.CreateReview(Review);

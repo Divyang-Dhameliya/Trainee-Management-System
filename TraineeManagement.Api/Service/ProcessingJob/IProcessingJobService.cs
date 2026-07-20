@@ -9,6 +9,5 @@ public interface IProcessingJobService
     ProcessingJobModel GetProcessingJobByCorrelationId(Guid id);
 
     Task<ProcessingJobResponseModel> GetProcessingJobById(long id);
-
-    Task UpdateProcessingJobById(int id, ProcessingJobEnum status);
+    
 }

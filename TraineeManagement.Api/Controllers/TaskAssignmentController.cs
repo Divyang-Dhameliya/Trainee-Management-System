@@ -9,7 +9,6 @@ namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
 [Route("/api/task-assignments")]
-[Authorize]
 public class TaskAssignmentController : ControllerBase
 {
     private readonly ITaskAssignmentService _taskAssignmentService;
@@ -20,6 +19,7 @@ public class TaskAssignmentController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Get()
     {        
         List <TaskAssignmentResponseModel> TaskAssignments = await _taskAssignmentService.GetTaskAssignments();
@@ -28,6 +28,7 @@ public class TaskAssignmentController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Get([FromRoute] long id)
     {
         TaskAssignmentResponseModel? TaskAssignment = await _taskAssignmentService.GetTaskAssignmentById(id);
@@ -36,6 +37,7 @@ public class TaskAssignmentController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Mentor")]
     public async Task<IActionResult> Post([FromBody] CreateTaskAssignmentRequestModel TaskAssignment)
     {
         TaskAssignmentResponseModel newTaskAssignment = await _taskAssignmentService.CreateTaskAssignment(TaskAssignment);
@@ -44,6 +46,7 @@ public class TaskAssignmentController : ControllerBase
     }
 
     [HttpPut("{id}/status")]
+    [Authorize(Roles = "Mentor")]
     public async Task<IActionResult> Put(long id,[FromBody] StatusUpdateRequest request)
     {
         

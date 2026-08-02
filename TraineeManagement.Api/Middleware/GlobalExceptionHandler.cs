@@ -33,7 +33,11 @@ public class GlobalExceptionHandler : IExceptionHandler
                 HttpStatusException => "Application Error",
                 _ => "Internal Server Error"
             },
-            Detail = exception.Message, 
+            Detail = exception switch
++           {
++               HttpStatusException httpEx => httpEx.Message,
++               _ => "An unexpected error occurred. Please try again later."
++           }, 
             Instance = httpContext.Request.Path
         };
 

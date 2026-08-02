@@ -177,6 +177,7 @@ var app = builder.Build();
 app.UseMiddleware<CorrelationIdMiddleware>();
 
 app.UseExceptionHandler(); 
+app.UseCors();
 app.UseAuthentication(); 
 app.UseAuthorization();
 

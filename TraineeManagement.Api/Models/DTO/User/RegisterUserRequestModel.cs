@@ -19,15 +19,31 @@ public class RegisterUserRequestModel
     [Required(ErrorMessage = UserConstants.PasswordHashRequiredErrorMessage)]
     public string? Password { get; set; }
 
+    // Only Trainee or Mentor may be requested here. Admin can never be
+    // self-assigned — AuthService.RegisterUser enforces this regardless
+    // of what value is sent.
     [Required(ErrorMessage = UserConstants.RoleRequiredErrorMessage)]
-    [EnumDataType(typeof(UserRole), ErrorMessage = UserConstants.RoleValidateErrorMessage)]
     public UserRole? Role { get; set; }
 
-    public RegisterUserRequestModel(string? userName, string? email, string? password, UserRole? role)
+    // Shared profile fields
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+
+    // Required only when Role == Trainee
+    public string? TechStack { get; set; }
+
+    // Required only when Role == Mentor
+    public string? Expertise { get; set; }
+
+    public RegisterUserRequestModel(string? userName, string? email, string? password, UserRole? role, string? firstName, string? lastName, string? techStack, string? expertise)
     {
         UserName = userName;
         Email = email;
         Password = password;
         Role = role;
+        FirstName = firstName;
+        LastName = lastName;
+        TechStack = techStack;
+        Expertise = expertise;
     }
 }

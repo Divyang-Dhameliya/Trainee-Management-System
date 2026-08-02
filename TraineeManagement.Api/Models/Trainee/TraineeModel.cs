@@ -9,6 +9,11 @@ public class TraineeModel
     [Key]
     public long Id { get; set; }
 
+    public long UserId { get; set; }
+
+    [ForeignKey(nameof(UserId))]
+    public UserModel? User { get; set; }
+    
     [Required(ErrorMessage = TraineeConstants.FirstNameRequiredErrorMessage)]
     [StringLength(TraineeConstants.MaxLength, ErrorMessage = TraineeConstants.FirstNameMaxLengthErrorMessage)]
     public string? FirstName { get; set; }

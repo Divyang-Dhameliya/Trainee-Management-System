@@ -5,6 +5,10 @@ using TraineeManagement.Api.Service.PasswordServiceInterface;
 using TraineeManagement.Api.DTO.UserDTO;
 using System.Net;
 using TraineeManagement.Api.Helpers;
+using TraineeManagement.Api.Enum.User;
+using TraineeManagement.Api.Enum.Mentor;
+using TraineeManagement.Api.Enum.Trainee;
+
 namespace TraineeManagement.Api.Service.AuthService;
 
 public class AuthService : IAuthService
@@ -41,16 +45,73 @@ public class AuthService : IAuthService
             throw new HttpStatusException(HttpStatusCode.BadRequest,"User Already Exists, Proceed with Login.");
         }
 
+        // allow-list only. Admin (or any other value) can never
+        // come from this endpoint — it always collapses to Trainee.
+        UserRole requestedRole = userRequestModel.Role == UserRole.Mentor
+            ? UserRole.Mentor
+            : UserRole.Trainee;
+
+        if (userRequestModel.FirstName == null || userRequestModel.LastName == null)
+        {
+            throw new HttpStatusException(HttpStatusCode.BadRequest, "FirstName and LastName are required.");
+        }
+
+        if (requestedRole == UserRole.Trainee && userRequestModel.TechStack == null)
+        {
+            throw new HttpStatusException(HttpStatusCode.BadRequest, "TechStack is required to register as a Trainee.");
+        }
+
+        if (requestedRole == UserRole.Mentor && userRequestModel.Expertise == null)
+        {
+            throw new HttpStatusException(HttpStatusCode.BadRequest, "Expertise is required to register as a Mentor.");
+        }
+
         UserModel newUser = new UserModel(
             userRequestModel.UserName,
             userRequestModel.Email,
             _passwordService.GetHashedPassword(userRequestModel.Password),
-            userRequestModel.Role
+            requestedRole
         );
 
-        _context.Users.Add(newUser);
+        await using var transaction = await _context.Database.BeginTransactionAsync();
 
-        await _context.SaveChangesAsync();
+        _context.Users.Add(newUser);
+        await _context.SaveChangesAsync(); 
+
+        if (requestedRole == UserRole.Trainee)
+        {
+            TraineeModel trainee = new TraineeModel(
+                userRequestModel.FirstName,
+                userRequestModel.LastName,
+                userRequestModel.Email,
+                userRequestModel.TechStack,
+                TraineeStatus.Active
+            )
+            {
+                UserId = newUser.Id
+            };
+
+            _context.Trainees.Add(trainee);
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            MentorModel mentor = new MentorModel(
+                userRequestModel.FirstName,
+                userRequestModel.LastName,
+                userRequestModel.Email,
+                userRequestModel.Expertise,
+                MentorStatus.Active
+            )
+            {
+                UserId = newUser.Id
+            };
+
+            _context.Mentors.Add(mentor);
+            await _context.SaveChangesAsync();
+        }
+
+        await transaction.CommitAsync();
 
         RegisterUserResponseModel response = new RegisterUserResponseModel(
             newUser.UserName,
@@ -95,8 +156,8 @@ public class AuthService : IAuthService
 
         if(jwtSettings == null || !int.TryParse(jwtSettings["ExpiryMinutes"], out int expiryMinutes))
         {
-+           _logger.LogCritical("JWT configuration (JwtSettings:ExpiryMinutes) is missing or invalid.");
-+           throw new HttpStatusException(HttpStatusCode.InternalServerError, "Authentication is temporarily unavailable. Please try again later.");
+           _logger.LogCritical("JWT configuration (JwtSettings:ExpiryMinutes) is missing or invalid.");
+           throw new HttpStatusException(HttpStatusCode.InternalServerError, "Authentication is temporarily unavailable. Please try again later.");
         }
 
         LoginUserResponseModel res = new LoginUserResponseModel(

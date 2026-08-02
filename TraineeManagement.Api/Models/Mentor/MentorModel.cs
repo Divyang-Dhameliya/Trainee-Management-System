@@ -9,6 +9,11 @@ public class MentorModel
     [Key]
     public long Id { get; set; }
 
+    public long UserId { get; set; }
+
+    [ForeignKey(nameof(UserId))]
+    public UserModel? User { get; set; }
+    
     [Required(ErrorMessage = MentorConstants.FirstNameRequiredErrorMessage)]
     [StringLength(MentorConstants.MaxLength, ErrorMessage = MentorConstants.FirstNameMaxLengthErrorMessage)]
     public string? FirstName { get; set; }

@@ -93,14 +93,15 @@ public class AuthService : IAuthService
 
         var jwtSettings = _config.GetSection("JwtSettings");
 
-        if(jwtSettings == null || jwtSettings["ExpiryMinutes"] == null)
+        if(jwtSettings == null || !int.TryParse(jwtSettings["ExpiryMinutes"], out int expiryMinutes))
         {
-            _logger.LogCritical("JWT configuration Not Found");
++           _logger.LogCritical("JWT configuration (JwtSettings:ExpiryMinutes) is missing or invalid.");
++           throw new HttpStatusException(HttpStatusCode.InternalServerError, "Authentication is temporarily unavailable. Please try again later.");
         }
 
         LoginUserResponseModel res = new LoginUserResponseModel(
             token,
-            int.Parse(jwtSettings["ExpiryMinutes"]),
+            expiryMinutes
             userDto        
         );
 

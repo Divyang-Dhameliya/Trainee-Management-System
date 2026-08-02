@@ -200,6 +200,7 @@ public class SubmissionService : ISubmissionService
         }
 
         string storageFileName = $"{Guid.NewGuid()}{extension}";
+        bool fileSaved = false;
 
         try
         {
@@ -235,7 +236,9 @@ public class SubmissionService : ISubmissionService
                 );
             }
 
-            _logger.LogWarning("File stored successfully. CorrelationId: {CorrelationId}, SubmissionId: {SubmissionId}, StorageFileName: {StorageFileName}",
+            fileSaved = true;
+
+            _logger.LogInformation("File stored successfully. CorrelationId: {CorrelationId}, SubmissionId: {SubmissionId}, StorageFileName: {StorageFileName}",
                 correlationId,
                 submissionId,
                 storageFileName
@@ -261,7 +264,7 @@ public class SubmissionService : ISubmissionService
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            _logger.LogWarning("SubmissionFile metadata persisted. CorrelationId: {CorrelationId}, SubmissionId: {SubmissionId}, FileName: {FileName}",
+            _logger.LogInformation("SubmissionFile metadata persisted. CorrelationId: {CorrelationId}, SubmissionId: {SubmissionId}, FileName: {FileName}",
                 correlationId,
                 submissionId,
                 file.FileName
@@ -309,10 +312,13 @@ public class SubmissionService : ISubmissionService
         }
         catch
         {
-            await _fileStorageService.DeleteAsync(
-                storageFileName,
-                cancellationToken
-            );
+            if(fileSaved)
+            {
+                await _fileStorageService.DeleteAsync(
+                    storageFileName,
+                    cancellationToken
+                );
+            }
 
             throw;
         }

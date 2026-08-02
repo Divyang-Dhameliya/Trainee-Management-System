@@ -4,6 +4,7 @@ using TraineeManagement.Api.DTO.SubmissionDTO;
 using TraineeManagement.Api.Service.SubmissionInterface;
 using TraineeManagement.Api.DTO.SubmissionFileDTO;
 using StackExchange.Redis;
+using TraineeManagement.Api.Helpers;
 
 namespace TraineeManagement.Api.Controllers;
 
@@ -66,6 +67,10 @@ public class SubmissionController : ControllerBase
     [Authorize( Roles = "Trainee,Mentor")]
     public async Task<IActionResult> Download(long fileId, CancellationToken cancellationToken)
     {
+        bool isOwner = await _submissionService.CallerOwnsFile(fileId, User.GetUserId(), User.IsInRole("Mentor"));
+
+        if (!isOwner) return Forbid();
+
         DownloadSubmissionFileResponseModel result = await _submissionService.DownloadAsync(
             fileId,
             cancellationToken
@@ -82,6 +87,10 @@ public class SubmissionController : ControllerBase
     [Authorize( Roles = "Trainee,Mentor")]
     public async Task<IActionResult> Delete(long fileId, CancellationToken cancellationToken)
     {
+        bool isOwner = await _submissionService.CallerOwnsFile(fileId, User.GetUserId(), User.IsInRole("Mentor"));
+
+        if (!isOwner) return Forbid();
+
         await _submissionService.DeleteAsync(
             fileId,
             cancellationToken

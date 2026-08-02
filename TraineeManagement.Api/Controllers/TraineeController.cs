@@ -4,6 +4,10 @@ using TraineeManagement.Api.Service.TraineeeInterface;
 using Microsoft.AspNetCore.Authorization;
 using TraineeManagement.Api.Enum.Trainee;
 using StackExchange.Redis;
+using System.Security.Claims;
+using Microsoft.IdentityModel.JsonWebTokens;
+using TraineeManagement.Api.Helpers;
+
 namespace TraineeManagement.Api.Controllers;
 
 [ApiController]
@@ -57,6 +61,14 @@ public class TraineeController : ControllerBase
     [Authorize(Roles = "Admin,Trainee")]
     public async Task<IActionResult> Delete(long id)
     {
+        if (!User.IsInRole("Admin"))
+        {
+            long callerUserId = User.GetUserId();            
+            bool isOwner = await _traineeService.IsOwnedByUser(id, callerUserId);
+            
+            if (!isOwner) return Forbid();
+        }
+
         await _traineeService.DeleteTrainee(id);
 
         return NoContent();
@@ -66,6 +78,14 @@ public class TraineeController : ControllerBase
     [Authorize(Roles = "Admin,Trainee")]
     public async Task<IActionResult> Put(long id,UpdateTraineeRequestModel updateTraineeRequest)
     {
+        if (!User.IsInRole("Admin"))
+        {
+            long callerUserId = User.GetUserId();            
+            bool isOwner = await _traineeService.IsOwnedByUser(id, callerUserId);
+            
+            if (!isOwner) return Forbid();
+        }
+
         TraineeResponseModel? trainee = await _traineeService.UpdateTrainee(id, updateTraineeRequest);
 
         return Ok(trainee);

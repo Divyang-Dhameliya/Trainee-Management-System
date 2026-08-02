@@ -16,4 +16,6 @@ public interface ITraineeService
     Task<TraineeResponseModel?> UpdateTrainee(long id, UpdateTraineeRequestModel updatedTrainee);
 
     Task<bool> DeleteTrainee(long id);
+
+    Task<bool> IsOwnedByUser(long traineeId, long userId);
 }

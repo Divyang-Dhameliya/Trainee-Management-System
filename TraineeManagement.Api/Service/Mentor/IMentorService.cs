@@ -13,4 +13,6 @@ public interface IMentorService
     Task<MentorResponseModel?> UpdateMentor(long id, UpdateMentorRequestModel updatedMentor);
 
     Task<bool> DeleteMentor(long id);
+
+    Task<bool> IsOwnedByUser(long mentorId, long userId);
 }

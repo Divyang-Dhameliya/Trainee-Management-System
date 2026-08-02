@@ -387,4 +387,21 @@ public class SubmissionService : ISubmissionService
 
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<bool> CallerOwnsFile(long fileId, long callerUserId, bool isMentor)
+    {
+        SubmissionFile? file = await _context.SubmissionFiles
+            .Include(f => f.Submission)
+                .ThenInclude(s => s!.TaskAssignment)
+            .FirstOrDefaultAsync(f => f.Id == fileId);
+
+        if (file?.Submission?.TaskAssignment == null)
+        {
+            return false;
+        }
+
+        return isMentor
+            ? await _context.Mentors.AnyAsync(m => m.Id == file.Submission.TaskAssignment.MentorId && m.UserId == callerUserId)
+            : await _context.Trainees.AnyAsync(t => t.Id == file.Submission.TaskAssignment.TraineeId && t.UserId == callerUserId);
+    }
 }

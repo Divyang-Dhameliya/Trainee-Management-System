@@ -4,6 +4,9 @@ using TraineeManagement.Api.Service.MentorInterface;
 using TraineeManagement.Api.Enum.Mentor;
 using TraineeManagement.Api.DTO.MentorDTO;
 using StackExchange.Redis;
+using System.Security.Claims;
+using Microsoft.IdentityModel.JsonWebTokens;
+using TraineeManagement.Api.Helpers;
 
 namespace TraineeManagement.Api.Controllers;
 
@@ -49,6 +52,14 @@ public class MentorController : ControllerBase
     [Authorize(Roles = "Admin,Mentor")]
     public async Task<IActionResult> Delete(long id)
     {
+        if (!User.IsInRole("Admin"))
+        {
+            long callerUserId = User.GetUserId();            
+            bool isOwner = await _mentorService.IsOwnedByUser(id, callerUserId);
+            
+            if (!isOwner) return Forbid();
+        }
+
         await _mentorService.DeleteMentor(id);
 
         return NoContent();
@@ -58,6 +69,14 @@ public class MentorController : ControllerBase
     [Authorize(Roles = "Admin,Mentor")]
     public async Task<IActionResult> Put(long id, UpdateMentorRequestModel updateMentorRequest)
     {
+        if (!User.IsInRole("Admin"))
+        {
+            long callerUserId = User.GetUserId();            
+            bool isOwner = await _mentorService.IsOwnedByUser(id, callerUserId);
+            
+            if (!isOwner) return Forbid();
+        }
+
         MentorResponseModel? Mentor = await _mentorService.UpdateMentor(id, updateMentorRequest);
 
         return Ok(Mentor);

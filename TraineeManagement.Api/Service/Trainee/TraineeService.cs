@@ -251,4 +251,9 @@ public class TraineeService : ITraineeService
 
         return true;
     }
+
+    public async Task<bool> IsOwnedByUser(long traineeId, long userId)
+    {
+        return await _context.Trainees.AnyAsync(t => t.Id == traineeId && t.UserId == userId);
+    }
 }

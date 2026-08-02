@@ -137,4 +137,9 @@ public class MentorService : IMentorService
 
         return true;
     }
+
+    public async Task<bool> IsOwnedByUser(long mentorId, long userId)
+    {
+        return await _context.Mentors.AnyAsync(m => m.Id == mentorId && m.UserId == userId);
+    }
 }

@@ -16,4 +16,6 @@ public interface ISubmissionService
     Task<DownloadSubmissionFileResponseModel> DownloadAsync(long fileId, CancellationToken cancellationToken = default);
 
     Task DeleteAsync(long fileId, CancellationToken cancellationToken = default);
+
+    Task<bool> CallerOwnsFile(long fileId, long callerUserId, bool isMentor);
 }   

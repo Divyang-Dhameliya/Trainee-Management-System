@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using TraineeManagement.Api.Constants;
 using TraineeManagement.Api.Enum.Mentor;
 

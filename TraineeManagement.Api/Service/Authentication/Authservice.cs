@@ -162,7 +162,7 @@ public class AuthService : IAuthService
 
         LoginUserResponseModel res = new LoginUserResponseModel(
             token,
-            expiryMinutes
+            expiryMinutes,
             userDto        
         );
 
